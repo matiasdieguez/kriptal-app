@@ -1,4 +1,5 @@
-const CACHE = 'kriptal-v1';
+const CACHE = 'kriptal-v2';
+const APP_ROOT = new URL('./', self.registration.scope).pathname;
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', event => {
@@ -7,5 +8,5 @@ self.addEventListener('fetch', event => {
     const copy = response.clone();
     caches.open(CACHE).then(cache => cache.put(event.request, copy));
     return response;
-  }).catch(() => caches.match('/'))));
+  }).catch(() => caches.match(APP_ROOT))));
 });

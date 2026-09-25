@@ -20,6 +20,12 @@ npm test
 
 The tests cover vault persistence and a complete two-user identity exchange, encryption, link opening, signature verification, and decryption flow.
 
+## GitHub Pages
+
+Pushes to `main` are tested and deployed automatically to [matiasdieguez.github.io/kriptal-app](https://matiasdieguez.github.io/kriptal-app/). In the repository settings, set **Pages > Build and deployment > Source** to **GitHub Actions** once. Pull requests run CI but do not deploy.
+
+The Pages workflow builds with `BASE_PATH=/kriptal-app/`; local builds continue to use the root path by default.
+
 ## Security model
 
 - The local vault is encrypted in `localStorage` with a password-derived AES-256-GCM key using PBKDF2-SHA-256.

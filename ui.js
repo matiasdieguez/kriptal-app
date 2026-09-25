@@ -482,6 +482,8 @@ export function initUI({ app, toast }) {
   }
 
   if ('serviceWorker' in navigator)
-    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    window.addEventListener('load', () =>
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`)
+    );
   renderSetup();
 }
