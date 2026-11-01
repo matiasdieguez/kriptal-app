@@ -258,6 +258,7 @@ test('shares public-key files and decrypts an encrypted message file', async ({ 
 
   await bob.getByRole('button', { name: 'Compose' }).click();
   await bob.locator('#recipient').selectOption({ label: 'alice' });
+  await expect(bob.locator('#subject')).toHaveCount(0);
   await bob.locator('#message').fill('A message only Alice can read.');
   await bob.getByRole('button', { name: 'Encrypt & create file' }).click();
   await expect(bob.locator('.modal')).toBeVisible();

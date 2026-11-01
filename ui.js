@@ -262,7 +262,7 @@ export function initUI({ app, toast }) {
       })
       .join('');
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Compose</div><h2>Make a private message</h2></div><div class="section-label">ML-KEM-768 / AES-256</div></div>${routeMessage ? `<div class="notice"><strong>Encrypted message detected.</strong> Verify the sender fingerprint against your saved contact before opening it.</div><div class="actions"><button id="decrypt-message">Verify & decrypt incoming message</button></div>` : ''}<form id="message-form"><div class="form-grid"><div><label for="recipient">Recipient</label><select id="recipient" required ${options ? '' : 'disabled'}><option value="">${options ? 'Choose a contact' : 'Add a contact first'}</option>${options}</select></div><div><label for="subject">Label (optional)</label><input id="subject" maxlength="80" placeholder="A note to yourself"></div><div class="full"><label for="message">Message</label><textarea id="message" maxlength="10000" placeholder="Write something only your contact can read..." required></textarea></div><div class="full"><label for="attachment">Attach a file (max 50 KB)</label><input id="attachment" type="file"></div></div><div class="actions"><button type="submit" ${options ? '' : 'disabled'}>Encrypt & create file</button><button type="button" class="secondary" id="clear-message">Clear</button></div></form></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Compose</div><h2>Make a private message</h2></div><div class="section-label">ML-KEM-768 / AES-256</div></div>${routeMessage ? `<div class="notice"><strong>Encrypted message detected.</strong> Verify the sender fingerprint against your saved contact before opening it.</div><div class="actions"><button id="decrypt-message">Verify & decrypt incoming message</button></div>` : ''}<form id="message-form"><div class="form-grid"><div><label for="recipient">Recipient</label><select id="recipient" required ${options ? '' : 'disabled'}><option value="">${options ? 'Choose a contact' : 'Add a contact first'}</option>${options}</select></div><div class="full"><label for="message">Message</label><textarea id="message" maxlength="10000" placeholder="Write something only your contact can read..." required></textarea></div><div class="full"><label for="attachment">Attach a file (max 50 KB)</label><input id="attachment" type="file"></div></div><div class="actions"><button type="submit" ${options ? '' : 'disabled'}>Encrypt & create file</button><button type="button" class="secondary" id="clear-message">Clear</button></div></form></section>`;
     document.querySelector('#message-form').addEventListener('submit', createMessage);
     document
       .querySelector('#clear-message')
@@ -364,7 +364,6 @@ export function initUI({ app, toast }) {
       salt
     );
     const content = {
-      subject: form.querySelector('#subject').value,
       message,
       file: file ? { name: file.name, type: file.type, data: b64(await file.arrayBuffer()) } : null
     };
@@ -538,7 +537,7 @@ export function initUI({ app, toast }) {
       if (content.file)
         fileButton = `<button id="download-file" class="secondary">Download ${escapeHtml(content.file.name)}</button>`;
       showModal(
-        `<div class="section-label">Verified from ${escapeHtml(messageFrom)}</div><h2>${escapeHtml(content.subject || 'Private message')}</h2><p class="lede">${escapeHtml(content.message).replaceAll('\n', '<br>')}</p><div class="notice">Sender fingerprint: ${escapeHtml(contact.fingerprint)}</div><div class="actions">${fileButton}<button class="secondary" id="close-modal">Close</button></div>`
+        `<div class="section-label">Verified from ${escapeHtml(messageFrom)}</div><h2>Private message</h2><p class="lede">${escapeHtml(content.message).replaceAll('\n', '<br>')}</p><div class="notice">Sender fingerprint: ${escapeHtml(contact.fingerprint)}</div><div class="actions">${fileButton}<button class="secondary" id="close-modal">Close</button></div>`
       );
       document.querySelector('#download-file')?.addEventListener('click', () => {
         const blob = new Blob([bytes(content.file.data)], {
