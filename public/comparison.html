@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical comparison of Kriptal's offline encrypted file exchange model with Signal, WhatsApp, and Telegram.">
+  <meta name="keywords" content="encrypted messaging comparison, Kriptal vs Signal, WhatsApp, Telegram, end-to-end encryption">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://matiasdieguez.github.io/kriptal-app/comparison.html">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./icon.png">
+  <title>Encrypted messaging tools: a practical comparison | Kriptal</title>
+</head>
+<body>
+  <div class="grain"></div>
+  <header class="topbar">
+    <a class="brand" href="./"><img src="./kriptal.png" alt=""><span>KRIPTAL</span></a>
+    <a class="back-link" href="./">Kriptal home</a>
+  </header>
+  <main class="shell">
+    <article class="info-page comparison-page">
+      <h1>Encrypted messaging tools: a practical comparison</h1>
+      <p class="lede">These products solve different problems. Kriptal is a local encrypted-file exchange tool, while Signal, WhatsApp, and Telegram are hosted messaging services. No single row determines which is right or safest for you.</p>
+      <p>Feature descriptions below are summaries of the vendors' linked documentation, not an independent security audit. Product behavior can change; consult current documentation and assess your own threat model.</p>
+
+      <div class="comparison-table-wrap" role="region" aria-label="Messaging tools comparison" tabindex="0">
+        <table class="comparison-table">
+          <thead>
+            <tr><th scope="col">Aspect</th><th scope="col">Kriptal</th><th scope="col">Signal</th><th scope="col">WhatsApp</th><th scope="col">Telegram</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Product model</th>
+              <td>Local-first PWA. People exchange identity and encrypted message files themselves; there is no hosted inbox or delivery relay.</td>
+              <td>Hosted messaging service with message delivery, groups, and calls.</td>
+              <td>Hosted messaging service with message delivery, groups, and calls.</td>
+              <td>Hosted cloud messaging service with optional Secret Chats.</td>
+            </tr>
+            <tr>
+              <th scope="row">Encryption behavior</th>
+              <td>Messages are encrypted for the selected recipient before the sender shares a file. Keys and message handling depend on the browser and device.</td>
+              <td>Signal says conversations are end-to-end encrypted by default using the Signal Protocol.</td>
+              <td>WhatsApp says personal messages and calls are end-to-end encrypted by default. Encrypted backups are a separate option.</td>
+              <td>Cloud Chats are not end-to-end encrypted by default. Secret Chats are end-to-end encrypted, one-to-one, and device-specific.</td>
+            </tr>
+            <tr>
+              <th scope="row">Delivery and availability</th>
+              <td>Manual file sharing; no automatic delivery, push notifications, or cloud inbox. Both people need compatible app access to exchange files.</td>
+              <td>Service handles delivery and supports linked devices and real-time communication.</td>
+              <td>Service handles delivery and supports linked devices and real-time communication.</td>
+              <td>Cloud Chats sync through Telegram's service; Secret Chats do not sync across devices.</td>
+            </tr>
+            <tr>
+              <th scope="row">Groups and calls</th>
+              <td>No built-in group messaging or calls.</td>
+              <td>Supports group messaging and calls.</td>
+              <td>Supports group messaging and calls.</td>
+              <td>Supports groups and calls; Secret Chats are one-to-one.</td>
+            </tr>
+            <tr>
+              <th scope="row">Key verification and security assurance</th>
+              <td>Users should compare contact fingerprints using a trusted separate channel. Kriptal has not been independently security-audited; standardized algorithms alone do not prove application security.</td>
+              <td>Provides safety-number verification and publishes protocol specifications.</td>
+              <td>Provides security codes to help users verify contacts. Review its current backup settings and security documentation.</td>
+              <td>Secret Chat keys can be compared in the app. Correctly choosing Secret Chat matters for end-to-end encryption.</td>
+            </tr>
+            <tr>
+              <th scope="row">Typical tradeoff</th>
+              <td>More manual control over when and how encrypted files are shared, but fewer conveniences and no hosted delivery.</td>
+              <td>Convenient real-time messaging with default end-to-end encryption, while relying on a hosted service.</td>
+              <td>Convenient messaging with default end-to-end encryption for personal messages and calls, while relying on a hosted service and separately configuring backups.</td>
+              <td>Cloud synchronization and broad features, but end-to-end encryption is limited to Secret Chats.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Sources</h2>
+      <ul class="source-list">
+        <li><a href="https://signal.org/" target="_blank" rel="noopener noreferrer">Signal — official product information</a></li>
+        <li><a href="https://signal.org/docs/specifications/doubleratchet/" target="_blank" rel="noopener noreferrer">Signal — Double Ratchet specification</a></li>
+        <li><a href="https://www.whatsapp.com/security" target="_blank" rel="noopener noreferrer">WhatsApp — Security</a></li>
+        <li><a href="https://telegram.org/faq#q-how-are-secret-chats-different" target="_blank" rel="noopener noreferrer">Telegram — FAQ: Secret Chats and Cloud Chats</a></li>
+      </ul>
+
+      <p class="legal-updated">This comparison is informational, not an endorsement or a substitute for reviewing each product's current documentation. See the <a href="./legal.html">Kriptal legal notice and disclaimer</a>.</p>
+    </article>
+  </main>
+</body>
+</html>

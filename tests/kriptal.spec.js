@@ -85,6 +85,38 @@ test('home provides readable how-it-works and technical security pages', async (
     'content',
     /Technical overview of Kriptal security/
   );
+  await expect(page.getByRole('link', { name: /Compare Kriptal with messaging services/ })).toHaveAttribute(
+    'href',
+    './comparison.html'
+  );
+});
+
+test('home links to legal notice, repository, and sourced product comparison', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: /Legal & disclaimer/ })).toHaveAttribute(
+    'href',
+    './legal.html'
+  );
+  await expect(page.getByRole('link', { name: /GitHub repository/ })).toHaveAttribute(
+    'href',
+    'https://github.com/matiasdieguez/kriptal-app'
+  );
+
+  await page.goto('/legal.html');
+  await expect(page.getByRole('heading', { name: 'Legal notice and disclaimer' })).toBeVisible();
+  await expect(page.getByText(/To the maximum extent permitted by applicable law/)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Kriptal GitHub repository' })).toHaveAttribute(
+    'href',
+    'https://github.com/matiasdieguez/kriptal-app'
+  );
+
+  await page.goto('/comparison.html');
+  await expect(page.getByRole('heading', { name: 'Encrypted messaging tools: a practical comparison' })).toBeVisible();
+  await expect(page.getByRole('table')).toContainText('Cloud Chats are not end-to-end encrypted by default');
+  await expect(page.getByRole('link', { name: /Signal — official product information/ })).toHaveAttribute(
+    'href',
+    'https://signal.org/'
+  );
 });
 
 test('language selector translates the home page and information pages in all supported languages', async ({ page }) => {

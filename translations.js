@@ -485,8 +485,56 @@ const infoText = {
   }
 };
 
+const additionalInfoText = {
+  es: {
+    'Legal & disclaimer': 'Aviso legal y descargo de responsabilidad',
+    'GitHub repository': 'Repositorio de GitHub',
+    'Compare Kriptal with messaging services': 'Comparar Kriptal con servicios de mensajería'
+  },
+  it: {
+    'Legal & disclaimer': 'Note legali e dichiarazione di non responsabilità',
+    'GitHub repository': 'Repository GitHub',
+    'Compare Kriptal with messaging services': 'Confronta Kriptal con i servizi di messaggistica'
+  },
+  pt: {
+    'Legal & disclaimer': 'Aviso legal e isenção de responsabilidade',
+    'GitHub repository': 'Repositório do GitHub',
+    'Compare Kriptal with messaging services': 'Compare o Kriptal com serviços de mensagens'
+  },
+  nl: {
+    'Legal & disclaimer': 'Juridische kennisgeving en disclaimer',
+    'GitHub repository': 'GitHub-repository',
+    'Compare Kriptal with messaging services': 'Vergelijk Kriptal met berichtendiensten'
+  },
+  fr: {
+    'Legal & disclaimer': 'Mentions légales et avertissement',
+    'GitHub repository': 'Dépôt GitHub',
+    'Compare Kriptal with messaging services': 'Comparer Kriptal aux services de messagerie'
+  },
+  zh: {
+    'Legal & disclaimer': '法律声明与免责声明',
+    'GitHub repository': 'GitHub 代码库',
+    'Compare Kriptal with messaging services': '比较 Kriptal 与其他消息服务'
+  },
+  ja: {
+    'Legal & disclaimer': '法的通知と免責事項',
+    'GitHub repository': 'GitHub リポジトリ',
+    'Compare Kriptal with messaging services': 'Kriptal とメッセージサービスを比較'
+  },
+  ru: {
+    'Legal & disclaimer': 'Правовое уведомление и отказ от ответственности',
+    'GitHub repository': 'Репозиторий GitHub',
+    'Compare Kriptal with messaging services': 'Сравнить Kriptal с сервисами обмена сообщениями'
+  },
+  eo: {
+    'Legal & disclaimer': 'Jura avizo kaj malrespondeco',
+    'GitHub repository': 'GitHub-deponejo',
+    'Compare Kriptal with messaging services': 'Kompari Kriptal kun mesaĝaj servoj'
+  }
+};
+
 for (const language of ['es', 'it', 'pt', 'nl', 'fr', 'zh', 'ja', 'ru', 'eo']) {
-  Object.assign(ptExtra[language], infoText[language]);
+  Object.assign(ptExtra[language], infoText[language], additionalInfoText[language]);
 }
 
 export function translateText(value, language) {
