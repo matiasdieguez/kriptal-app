@@ -5,54 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="A practical comparison of Kriptal's offline encrypted file exchange model with Signal, WhatsApp, and Telegram."
-    />
-    <meta
-      name="keywords"
-      content="encrypted messaging comparison, Kriptal vs Signal, WhatsApp, Telegram, end-to-end encryption"
+      content="Plain-language answers about Kriptal, encryption, key fingerprints, local vaults, message files, and security limits."
     />
     <meta name="robots" content="index, follow" />
     <script src="./theme.js"></script>
-    <link
-      rel="canonical"
-      href="https://matiasdieguez.github.io/kriptal-app/faq.html"
-    />
+    <link rel="canonical" href="https://matiasdieguez.github.io/kriptal-app/faq.html" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="icon" href="./icon.png" />
-    <title>FAQ | Kriptal</title>
+    <title>Frequently asked questions | Kriptal</title>
   </head>
   <body>
     <div class="grain"></div>
     <header class="topbar">
-      <a class="brand" href="./"
-        ><img src="./kriptal.png" alt="" /><span>KRIPTAL</span></a
-      >
-      <a class="back-link" href="./">Kriptal home</a>
+      <a class="brand" href="./landing.html" aria-label="Kriptal landing page"><img src="./kriptal.png" alt="" /><span>KRIPTAL</span></a>
+      <div class="topbar-tools">
+        <a class="back-link" href="./landing.html">About Kriptal</a>
+        <a class="landing-cta" href="./">Open Kriptal</a>
+      </div>
     </header>
     <main class="shell">
-      <article class="info-page comparison-page">
-        <h2>FAQ</h2>
-        <h3>How does Kriptal ensure end-to-end encryption?</h3>
-        <p>
-          By design, Kriptal provides end-to-end encryption for messages
-          exchanged between Kriptal identities. The sender’s device encrypts
-          each message for the recipient before creating the shareable file;
-          there’s no Kriptal message server or relay. The message also carries a
-          sender signature. The implementation combines P-256 ECDH with
-          ML-KEM-768 to derive the encryption key, and uses ML-DSA-65 for
-          signatures (crypto.js, message creation). It is designed to resist
-          post-quantum attacks, but I wouldn’t claim it is proven “post-quantum
-          safe.” ML-KEM-768 and ML-DSA-65 are post-quantum algorithms, and the
-          message key combines ML-KEM with classical P-256. However, the whole
-          application has not been independently audited or formally verified.
-          Kriptal also does not provide a ratchet or forward secrecy: if a
-          recipient’s long-term private keys are later compromised, previously
-          saved message files may be at risk. For practical security, verify a
-          contact’s key fingerprint through a trusted separate channel, protect
-          your devices and vault password, and remember that a compromised
-          browser or app update could undermine encryption. These limits are
-          also described in the legal notice.
-        </p>
+      <article class="info-page faq-page">
+        <a class="back-link" href="./landing.html">← Back to Kriptal overview</a>
+        <div class="section-label">Plain-language guide</div>
+        <h1>Frequently asked questions</h1>
+        <p class="lede">New to encryption? Start here. Technical words are explained as they come up, in everyday language.</p>
+
+        <section class="faq-group" aria-labelledby="faq-about">
+          <h2 id="faq-about">About Kriptal</h2>
+          <details>
+            <summary>What is Kriptal?</summary>
+            <p>Kriptal is an app for writing a message, locking it with encryption for one contact, and creating a file that you share yourself. Think of it like putting a letter in a locked box: the recipient has the right key to open it. Kriptal does not deliver messages or keep an inbox.</p>
+          </details>
+          <details>
+            <summary>Is Kriptal like a regular chat app?</summary>
+            <p>No. There are no Kriptal accounts, live chats, or message delivery servers. You and your contact exchange identity files first, then share encrypted message files using your device’s share sheet or another method. You are responsible for getting the file to the right person.</p>
+          </details>
+          <details>
+            <summary>What does “end-to-end encryption” mean here?</summary>
+            <p>It means your device encrypts the message before you share it, and the intended contact’s device decrypts it. The file-sharing service you choose may carry the locked, encrypted file, but Kriptal does not receive a copy of the message. File names, who you share with, and when you share may still reveal information, depending on the service you use.</p>
+          </details>
+          <details>
+            <summary>Does Kriptal send or store my messages?</summary>
+            <p>No. Kriptal creates a file on your device. It does not send the file, run a message inbox, or store your messages on a Kriptal server. You choose how to share the file; that other app or service has its own privacy and data-handling practices.</p>
+          </details>
+        </section>
+
+        <section class="faq-group" aria-labelledby="faq-keys">
+          <h2 id="faq-keys">Identity, keys, and fingerprints</h2>
+          <details>
+            <summary>What is a public-key file? Is it secret?</summary>
+            <p>A public-key file is a shareable identity card for encryption. It contains public keys that let other people encrypt messages for you and check your signatures. It does not contain your private keys or vault password. Keep your private keys private; share your public-key file with the people you want to communicate with.</p>
+          </details>
+          <details>
+            <summary>What is a fingerprint, and why should we compare it?</summary>
+            <p>A fingerprint is a short code made from a person’s public keys. Compare it with your contact in person, on a call, or through another trusted channel. If the codes match, it is much harder for someone to secretly replace the identity file. A username by itself does not prove who someone is.</p>
+          </details>
+          <details>
+            <summary>What are public and private keys?</summary>
+            <p>They are a matched pair of digital keys. A public key can be shared; a private key must stay secret. Other people use your public keys to prepare messages for you, while your private keys let your device open them and prove messages came from your identity.</p>
+          </details>
+          <details>
+            <summary>What does a digital signature do?</summary>
+            <p>A digital signature is like a tamper-check and a sender check. Kriptal uses it to check that a message was made by the private key matching a saved contact’s public key, and that the signed message has not been changed. Verify the contact’s fingerprint separately so you know that saved key belongs to the person you expect.</p>
+          </details>
+        </section>
+
+        <section class="faq-group" aria-labelledby="faq-terms">
+          <h2 id="faq-terms">Encryption terms, in everyday words</h2>
+          <details>
+            <summary>What do AES-256-GCM and PBKDF2 mean for my vault?</summary>
+            <p><strong>AES-256-GCM</strong> is a well-known method for locking data with a secret key; it also checks whether the locked data was changed. Kriptal uses it to encrypt your local vault and message contents. <strong>PBKDF2</strong> is a process that turns your password into the vault key and deliberately takes work, making password guessing slower. Use a strong password: this process cannot recover a forgotten one.</p>
+          </details>
+          <details>
+            <summary>What are P-256 and ML-KEM-768?</summary>
+            <p>They are two different kinds of key-making math. <strong>P-256</strong> is a widely used method based on elliptic-curve math. <strong>ML-KEM-768</strong> is a newer, standardized method designed to withstand attacks from future quantum computers. Kriptal combines both when creating a message key, rather than relying on only one. “Designed to resist” does not mean the whole app has been proven safe against every attack.</p>
+          </details>
+          <details>
+            <summary>What do ECDH and HKDF do?</summary>
+            <p><strong>ECDH</strong> is the name for using elliptic-curve keys to agree on a shared secret without sending that secret itself. In Kriptal, P-256 is the curve used for this part. <strong>HKDF</strong> takes shared secret material and carefully turns it into a key for locking the message. These are behind-the-scenes steps; you do not need to operate them yourself.</p>
+          </details>
+          <details>
+            <summary>What is ML-DSA-65?</summary>
+            <p><strong>ML-DSA-65</strong> is a standardized way to create and check digital signatures. It is designed to withstand attacks from future quantum computers. In simple terms, it helps the recipient check that a message matches the sender’s saved identity and was not altered.</p>
+          </details>
+          <details>
+            <summary>Does “post-quantum” mean Kriptal is future-proof?</summary>
+            <p>No. “Post-quantum” describes algorithms designed to resist attacks from quantum computers; it is not a guarantee about the whole app. Kriptal combines ML-KEM-768 with P-256 and uses ML-DSA-65 signatures, but the complete app has not been independently audited or formally proven secure.</p>
+          </details>
+          <details>
+            <summary>What are FIPS 203 and FIPS 204?</summary>
+            <p>They are official U.S. standards that describe ML-KEM (FIPS 203) and ML-DSA (FIPS 204). A published standard explains how an algorithm should work; using a standardized algorithm does not by itself prove an app implemented it correctly or is secure overall.</p>
+          </details>
+        </section>
+
+        <section class="faq-group" aria-labelledby="faq-vault">
+          <h2 id="faq-vault">Your vault and your device</h2>
+          <details>
+            <summary>Where are my identity and contacts kept?</summary>
+            <p>They are kept in encrypted browser storage on the device where you created your vault. They are not automatically backed up or synced to another device. Anyone who can unlock your device and vault may be able to access them.</p>
+          </details>
+          <details>
+            <summary>Can I reset my password or recover my identity?</summary>
+            <p>No. Kriptal does not know your password and has no password-reset service. If you forget it, lose the device, or erase its browser data, your identity and contacts may be lost. There is no automatic cloud backup.</p>
+          </details>
+          <details>
+            <summary>Can I use Kriptal offline?</summary>
+            <p>After the app has loaded, its installed or cached app shell can open offline. You still need some way to transfer the message file to your contact. Browser and device support for installing the app and sharing or opening files varies.</p>
+          </details>
+          <details>
+            <summary>What do “log out” and “wipe app data” do?</summary>
+            <p><strong>Log out</strong> locks the current session but keeps the encrypted vault on the device. <strong>Wipe all app data</strong> removes the local vault, contacts, settings, and app cache. Wiping cannot be undone, so export or save anything you need first.</p>
+          </details>
+        </section>
+
+        <section class="faq-group" aria-labelledby="faq-limits">
+          <h2 id="faq-limits">Sharing, message limits, and safety</h2>
+          <details>
+            <summary>Does the recipient need Kriptal?</summary>
+            <p>Yes. The recipient needs Kriptal to import your public identity and open Kriptal message files. On supported devices, the app may be installed as a progressive web app (PWA)—a website that can be added to your home screen or app list.</p>
+          </details>
+          <details>
+            <summary>Can I attach a file? How long are messages valid?</summary>
+            <p>You can attach files up to 50 KB, and message text is limited to 10 KB. Messages expire seven days after they are created. After a message is successfully opened, Kriptal marks it as used on that device to help prevent opening it again there. This does not recall copies or delete files you have already shared.</p>
+          </details>
+          <details>
+            <summary>Can a recipient copy or forward my message?</summary>
+            <p>Yes. Encryption protects the message while it is being shared and before the recipient opens it. Once decrypted, the recipient can save, copy, photograph, or forward what they see. Kriptal cannot control another person’s device.</p>
+          </details>
+          <details>
+            <summary>Do old messages stay safe if a private key is later stolen?</summary>
+            <p>Do not assume so. Kriptal does not use a “ratchet,” a method that continually changes message keys, or provide “forward secrecy,” which aims to protect past messages if a current key is exposed. Someone who later gets a recipient’s long-term private keys and saved encrypted message files may be able to put those files at risk.</p>
+          </details>
+          <details>
+            <summary>Has Kriptal been independently security-audited?</summary>
+            <p>No independent audit or formal proof of the complete app is claimed. The source code is public so people can inspect and build it, but public code alone does not prove a release is safe or identical to the source. Keep your device updated and use a tool with a suitable independent review for high-risk situations.</p>
+          </details>
+          <details>
+            <summary>What does Kriptal not protect against?</summary>
+            <p>It cannot protect a compromised or unlocked device, stop a recipient from copying a message, or hide all information about when and with whom you share files. The browser, operating system, or file-sharing service may expose information outside the encrypted message. Consider your situation and choose trusted devices and sharing channels.</p>
+          </details>
+        </section>
+        <p class="faq-footer-links"><a class="back-link" href="./landing.html">← Back to Kriptal overview</a><a class="back-link" href="./">Open Kriptal →</a></p>
       </article>
     </main>
   </body>

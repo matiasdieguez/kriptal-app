@@ -8,4 +8,8 @@
     <loc>https://matiasdieguez.github.io/kriptal-app/landing.html</loc>
     <changefreq>monthly</changefreq>
   </url>
+  <url>
+    <loc>https://matiasdieguez.github.io/kriptal-app/faq.html</loc>
+    <changefreq>monthly</changefreq>
+  </url>
 </urlset>

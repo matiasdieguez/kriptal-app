@@ -7,6 +7,7 @@ Identity exports contain public keys only. Encrypted-message exports contain the
 Identity exports are named `{username}.kriptalkey`; encrypted messages use `{sender}-{YYYYMMDD-HHMMSS}.kriptalmsg`. On browsers and operating systems that support PWA file handling, install Kriptal and choose it from the OS “Open with” or share options for these file types. Opening a file this way takes the user to the app; after unlocking the local vault, Kriptal imports the identity or verifies and decrypts the message.
 
 Visit [`landing.html`](./public/landing.html) for the product overview, security and privacy practices, PWA installation instructions, and illustrated usage guide.
+The [FAQ](./public/faq.html) explains encryption and app terminology in plain language and answers common usage and security questions.
 
 Kriptal uses a dark theme by default. Change the theme, lock the vault, or wipe local app data from Configuration. Wiping removes the local identity, contacts, preferences, replay history, and offline app cache.
 

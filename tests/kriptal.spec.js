@@ -76,11 +76,13 @@ test('home provides readable how-it-works and technical security pages', async (
   await page.getByRole('link', { name: /How Kriptal works/ }).click();
   await expect(page.getByRole('heading', { name: 'How Kriptal works' })).toBeVisible();
   await expect(page.getByText(/No server, cloud inbox, or message relay/)).toBeVisible();
+  await expect(page.getByRole('link', { name: /FAQ — simple explanations/ })).toHaveAttribute('href', './faq.html');
   await page.getByRole('link', { name: '← Back to Kriptal' }).click();
   await page.getByRole('link', { name: /Security & technical details/ }).click();
   await expect(page.getByRole('heading', { name: 'Security and technical details' })).toBeVisible();
   await expect(page.getByText(/PBKDF2-SHA-256/)).toBeVisible();
   await expect(page.getByText(/ML-KEM-768/).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /FAQ — simple explanations/ })).toHaveAttribute('href', './faq.html');
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     'content',
     /Technical overview of Kriptal security/
@@ -204,12 +206,28 @@ test('landing page explains security, installation, and use with working illustr
   await expect(page.getByRole('heading', { name: 'Make Kriptal an app.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'From first setup to a verified message.' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Tor Project ↗' })).toHaveAttribute('href', 'https://www.torproject.org/');
+  await expect(page.getByRole('link', { name: 'FAQ', exact: true })).toHaveAttribute('href', './faq.html');
   await expect(page.getByRole('link', { name: 'Open Kriptal' }).first()).toHaveAttribute('href', './');
   await expect(page.locator('.landing-section img')).toHaveCount(4);
   for (const image of await page.locator('.landing-section img').all()) {
     await expect(image).toHaveJSProperty('complete', true);
     await expect.poll(() => image.evaluate((element) => element.naturalWidth)).toBeGreaterThan(0);
   }
+  const stylesheet = await page.request.get('/styles.css');
+  expect(stylesheet.ok()).toBe(true);
+  expect(await stylesheet.text()).toContain('.landing-hero');
+});
+
+test('plain-language FAQ explains key terms and practical security limits', async ({ page }) => {
+  await page.goto('/faq.html');
+  await expect(page.getByRole('heading', { name: 'Frequently asked questions' })).toBeVisible();
+  await page.getByText('Is Kriptal like a regular chat app?').click();
+  await expect(page.getByText(/There are no Kriptal accounts, live chats, or message delivery servers/)).toBeVisible();
+  await page.getByText('What do AES-256-GCM and PBKDF2 mean for my vault?').click();
+  await expect(page.getByText(/PBKDF2 is a process that turns your password into the vault key/)).toBeVisible();
+  await page.getByText('Does “post-quantum” mean Kriptal is future-proof?').click();
+  await expect(page.getByText(/the complete app has not been independently audited/)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open Kriptal', exact: true })).toHaveAttribute('href', './');
 });
 
 async function createIdentity(page, username) {
