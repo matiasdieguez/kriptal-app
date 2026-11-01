@@ -537,6 +537,148 @@ for (const language of ['es', 'it', 'pt', 'nl', 'fr', 'zh', 'ja', 'ru', 'eo']) {
   Object.assign(ptExtra[language], infoText[language], additionalInfoText[language]);
 }
 
+const configurationText = {
+  es: {
+    Configuration: 'Configuración',
+    'Preferences & privacy': 'Preferencias y privacidad',
+    'Color theme': 'Tema de color',
+    'Choose how Kriptal looks on this device.': 'Elige cómo se ve Kriptal en este dispositivo.',
+    Dark: 'Oscuro',
+    Light: 'Claro',
+    'Log out': 'Cerrar sesión',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Bloquea tu bóveda. Tu identidad y tus contactos seguirán guardados en este dispositivo.',
+    'Wipe all app data': 'Borrar todos los datos de la app',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Elimina permanentemente de este dispositivo tu identidad local, contactos, ajustes, historial de mensajes y caché sin conexión.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': '¿Borrar todos los datos de Kriptal en este dispositivo? Tu identidad y tus contactos no se podrán recuperar.',
+    'Could not wipe all app data': 'No se pudieron borrar todos los datos de la app',
+    'All Kriptal app data was wiped': 'Se borraron todos los datos de Kriptal'
+  },
+  it: {
+    Configuration: 'Configurazione',
+    'Preferences & privacy': 'Preferenze e privacy',
+    'Color theme': 'Tema colori',
+    'Choose how Kriptal looks on this device.': 'Scegli l’aspetto di Kriptal su questo dispositivo.',
+    Dark: 'Scuro',
+    Light: 'Chiaro',
+    'Log out': 'Esci',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Blocca il tuo archivio. Identità e contatti resteranno salvati su questo dispositivo.',
+    'Wipe all app data': 'Cancella tutti i dati dell’app',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Rimuove definitivamente da questo dispositivo identità locale, contatti, impostazioni, cronologia dei messaggi e cache offline.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Cancellare tutti i dati di Kriptal da questo dispositivo? Identità e contatti non potranno essere recuperati.',
+    'Could not wipe all app data': 'Impossibile cancellare tutti i dati dell’app',
+    'All Kriptal app data was wiped': 'Tutti i dati di Kriptal sono stati cancellati'
+  },
+  pt: {
+    Configuration: 'Configuração',
+    'Preferences & privacy': 'Preferências e privacidade',
+    'Color theme': 'Tema de cores',
+    'Choose how Kriptal looks on this device.': 'Escolha a aparência do Kriptal neste dispositivo.',
+    Dark: 'Escuro',
+    Light: 'Claro',
+    'Log out': 'Sair',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Bloqueie seu cofre. Sua identidade e seus contatos continuarão salvos neste dispositivo.',
+    'Wipe all app data': 'Apagar todos os dados do app',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Remova permanentemente deste dispositivo sua identidade local, contatos, configurações, histórico de mensagens e cache offline.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Apagar todos os dados do Kriptal neste dispositivo? Sua identidade e seus contatos não poderão ser recuperados.',
+    'Could not wipe all app data': 'Não foi possível apagar todos os dados do app',
+    'All Kriptal app data was wiped': 'Todos os dados do Kriptal foram apagados'
+  },
+  nl: {
+    Configuration: 'Configuratie',
+    'Preferences & privacy': 'Voorkeuren en privacy',
+    'Color theme': 'Kleurthema',
+    'Choose how Kriptal looks on this device.': 'Kies hoe Kriptal eruitziet op dit apparaat.',
+    Dark: 'Donker',
+    Light: 'Licht',
+    'Log out': 'Uitloggen',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Vergrendel je kluis. Je identiteit en contacten blijven op dit apparaat opgeslagen.',
+    'Wipe all app data': 'Alle appgegevens wissen',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Verwijder je lokale identiteit, contacten, instellingen, berichtgeschiedenis en offline cache definitief van dit apparaat.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Alle Kriptal-gegevens op dit apparaat wissen? Je identiteit en contacten kunnen niet worden hersteld.',
+    'Could not wipe all app data': 'Alle appgegevens konden niet worden gewist',
+    'All Kriptal app data was wiped': 'Alle Kriptal-appgegevens zijn gewist'
+  },
+  fr: {
+    Configuration: 'Configuration',
+    'Preferences & privacy': 'Préférences et confidentialité',
+    'Color theme': 'Thème de couleur',
+    'Choose how Kriptal looks on this device.': 'Choisissez l’apparence de Kriptal sur cet appareil.',
+    Dark: 'Sombre',
+    Light: 'Clair',
+    'Log out': 'Se déconnecter',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Verrouillez votre coffre. Votre identité et vos contacts resteront enregistrés sur cet appareil.',
+    'Wipe all app data': 'Effacer toutes les données de l’application',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Supprime définitivement de cet appareil votre identité locale, vos contacts, vos préférences, l’historique des messages et le cache hors ligne.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Effacer toutes les données Kriptal de cet appareil ? Votre identité et vos contacts ne pourront pas être récupérés.',
+    'Could not wipe all app data': 'Impossible d’effacer toutes les données de l’application',
+    'All Kriptal app data was wiped': 'Toutes les données Kriptal ont été effacées'
+  },
+  zh: {
+    Configuration: '配置',
+    'Preferences & privacy': '偏好设置与隐私',
+    'Color theme': '颜色主题',
+    'Choose how Kriptal looks on this device.': '选择 Kriptal 在此设备上的外观。',
+    Dark: '深色',
+    Light: '浅色',
+    'Log out': '退出登录',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': '锁定保险库。你的身份和联系人仍保存在此设备上。',
+    'Wipe all app data': '清除所有应用数据',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': '永久删除此设备上的本地身份、联系人、设置、消息记录和离线应用缓存。',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': '清除此设备上的所有 Kriptal 应用数据？身份和联系人无法恢复。',
+    'Could not wipe all app data': '无法清除所有应用数据',
+    'All Kriptal app data was wiped': '已清除所有 Kriptal 应用数据'
+  },
+  ja: {
+    Configuration: '設定',
+    'Preferences & privacy': '設定とプライバシー',
+    'Color theme': 'カラーテーマ',
+    'Choose how Kriptal looks on this device.': 'このデバイスでの Kriptal の外観を選択します。',
+    Dark: 'ダーク',
+    Light: 'ライト',
+    'Log out': 'ログアウト',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': '保管庫をロックします。ID と連絡先はこのデバイスに保存されます。',
+    'Wipe all app data': 'アプリデータをすべて消去',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'このデバイスから ID、連絡先、設定、メッセージ履歴、オフラインキャッシュを完全に削除します。',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'このデバイスの Kriptal データをすべて消去しますか？ID と連絡先は復元できません。',
+    'Could not wipe all app data': 'アプリデータを消去できませんでした',
+    'All Kriptal app data was wiped': 'Kriptal のアプリデータをすべて消去しました'
+  },
+  ru: {
+    Configuration: 'Настройки',
+    'Preferences & privacy': 'Настройки и конфиденциальность',
+    'Color theme': 'Цветовая тема',
+    'Choose how Kriptal looks on this device.': 'Выберите оформление Kriptal на этом устройстве.',
+    Dark: 'Тёмная',
+    Light: 'Светлая',
+    'Log out': 'Выйти',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Заблокируйте хранилище. Идентификатор и контакты останутся на этом устройстве.',
+    'Wipe all app data': 'Удалить все данные приложения',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Безвозвратно удалить с устройства локальный идентификатор, контакты, настройки, историю сообщений и автономный кеш.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Удалить все данные Kriptal на этом устройстве? Идентификатор и контакты нельзя будет восстановить.',
+    'Could not wipe all app data': 'Не удалось удалить все данные приложения',
+    'All Kriptal app data was wiped': 'Все данные Kriptal удалены'
+  },
+  eo: {
+    Configuration: 'Agordo',
+    'Preferences & privacy': 'Preferoj kaj privateco',
+    'Color theme': 'Kolora etoso',
+    'Choose how Kriptal looks on this device.': 'Elektu la aspekton de Kriptal en ĉi tiu aparato.',
+    Dark: 'Malhela',
+    Light: 'Hela',
+    'Log out': 'Elsaluti',
+    'Lock your vault. Your identity and contacts will remain saved on this device.': 'Ŝlosu vian trezorejon. Via identeco kaj kontaktoj restos konservitaj en ĉi tiu aparato.',
+    'Wipe all app data': 'Forviŝi ĉiujn datumojn de la aplikaĵo',
+    'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Konstante forigi de ĉi tiu aparato vian lokan identecon, kontaktojn, agordojn, mesaĝhistorion kaj eksterretan kaŝmemoron.',
+    'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Ĉu forviŝi ĉiujn datumojn de Kriptal en ĉi tiu aparato? Via identeco kaj kontaktoj ne estas reakireblaj.',
+    'Could not wipe all app data': 'Ne eblis forviŝi ĉiujn datumojn de la aplikaĵo',
+    'All Kriptal app data was wiped': 'Ĉiuj datumoj de Kriptal estis forviŝitaj'
+  }
+};
+
+for (const [language, strings] of Object.entries(configurationText)) {
+  Object.assign(ptExtra[language], strings);
+}
+
 export function translateText(value, language) {
   if (!language || language === 'en') return value;
   const dict = ptExtra[language] || {};

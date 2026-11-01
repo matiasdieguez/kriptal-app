@@ -251,7 +251,7 @@ test('creates a local identity and unlocks it after reload', async ({ browser })
   await page.setViewportSize({ width: 1280, height: 900 });
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   await expect(nav.getByText('Compose')).toBeVisible();
-  await expect(nav.locator('.nav-icon')).toHaveCount(4);
+  await expect(nav.locator('.nav-icon')).toHaveCount(5);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(nav.getByText('Compose')).toBeHidden();
   await expect(nav.locator('.nav-icon').first()).toBeVisible();
@@ -263,6 +263,47 @@ test('creates a local identity and unlocks it after reload', async ({ browser })
   await expect(page.locator('.user strong')).toHaveText('maren');
 
   await context.close();
+});
+
+test('defaults to dark theme and configures theme, logout, and app-data wipe', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect(await page.evaluate(() => localStorage.getItem('kriptal-theme'))).toBeNull();
+  await createIdentity(page, 'settings-user');
+  await page.locator('#language-select').selectOption('es');
+  await page.getByRole('button', { name: 'Configuración' }).click();
+  await expect(page.getByRole('heading', { name: 'Configuración' })).toBeVisible();
+  await page.getByLabel('Tema de color').selectOption('light');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(245, 241, 232)');
+  await page.locator('#language-select').selectOption('en');
+
+  await page.goto('/legal.html');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.goto('/');
+  await page.getByLabel('Vault password').fill(password);
+  await page.getByRole('button', { name: 'Unlock Kriptal' }).click();
+  await page.getByRole('button', { name: 'Configuration' }).click();
+  await page.getByRole('button', { name: 'Log out' }).click();
+  await expect(page.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
+  expect(await page.evaluate(() => Boolean(localStorage.getItem('kriptal.vault')))).toBe(true);
+
+  await page.getByLabel('Vault password').fill(password);
+  await page.getByRole('button', { name: 'Unlock Kriptal' }).click();
+  await page.getByRole('button', { name: 'Configuration' }).click();
+  await page.evaluate(async () => {
+    localStorage.setItem('kriptal.extra', 'test');
+    sessionStorage.setItem('session-data', 'test');
+    const cache = await caches.open('kriptal-test');
+    await cache.put('/app-data-test', new Response('cached'));
+  });
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Wipe all app data' }).click();
+  await expect(page.getByRole('heading', { name: 'Set up your local vault' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  expect(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('kriptal')))).toEqual([]);
+  expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
+  expect(await page.evaluate(async () => (await caches.keys()).filter((name) => name.startsWith('kriptal-')))).toEqual([]);
 });
 
 test('shares public-key files and decrypts an encrypted message file', async ({ browser }) => {

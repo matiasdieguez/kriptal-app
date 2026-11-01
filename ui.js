@@ -36,6 +36,7 @@ import { languages, languageTag, translateAttribute, translateText } from './tra
 export function initUI({ app, toast }) {
   const textEncoder = new TextEncoder();
   let session = null;
+  let theme = localStorage.getItem('kriptal-theme') === 'light' ? 'light' : 'dark';
   let view = 'compose';
   let routeMessage = readRoute('m');
   let routeKey = readRoute('k');
@@ -221,6 +222,12 @@ export function initUI({ app, toast }) {
   function renderApp() {
     app.classList.remove('setup-screen');
     app.innerHTML = `<div class="dashboard"><aside class="side"><div class="user"><div class="section-label">Local identity</div><strong>${escapeHtml(session.username)}</strong><p class="section-label">ML-KEM-768 / P-256</p></div><nav aria-label="Main navigation"><button class="${view === 'compose' ? 'active' : ''}" data-view="compose" aria-label="Compose"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="nav-label">Compose</span></button><button class="${view === 'contacts' ? 'active' : ''}" data-view="contacts" aria-label="Contacts"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h2a5.5 5.5 0 0 1 5.5 5.5V20Zm12-15.5a3.5 3.5 0 0 1 0 7m2 2h.5a4.5 4.5 0 0 1 4.5 4.5V20h-3"/></svg><span class="nav-label">Contacts</span></button><button class="${view === 'open-message' ? 'active' : ''}" data-view="open-message" aria-label="Open message"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11.5h7m-3-3 3 3-3 3"/></svg><span class="nav-label">Open message</span></button><button class="${view === 'identity' ? 'active' : ''}" data-view="identity" aria-label="Identity"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M5.5 16a3.5 3.5 0 0 1 7 0m3-5h3m-3 3h3"/></svg><span class="nav-label">Identity</span></button></nav></aside><section id="workspace"></section></div>`;
+    app
+      .querySelector('nav[aria-label="Main navigation"]')
+      .insertAdjacentHTML(
+        'beforeend',
+        `<button class="${view === 'settings' ? 'active' : ''}" data-view="settings" aria-label="Configuration"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.7v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h2.4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2V14h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg><span class="nav-label">Configuration</span></button>`
+      );
     localizeElement(app);
     app.querySelectorAll('[data-view]').forEach((button) =>
       button.addEventListener('click', () => {
@@ -232,6 +239,7 @@ export function initUI({ app, toast }) {
     if (view === 'contacts') renderContacts();
     if (view === 'open-message') renderOpenMessage();
     if (view === 'identity') renderIdentity();
+    if (view === 'settings') renderSettings();
     if (view === 'import') renderImportContact();
     openPendingLink();
     processLaunchFiles();
@@ -431,6 +439,75 @@ export function initUI({ app, toast }) {
     document.querySelector('#download-key').addEventListener('click', () =>
       downloadExportFile(`${exportName(session.username)}.kriptalkey`, 'kriptal-public-identity', identity)
     );
+  }
+
+  function renderSettings() {
+    document.querySelector('#workspace').innerHTML =
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Preferences & privacy</div><h2>Configuration</h2></div></div><div class="setting-row"><div><h3>Color theme</h3><p class="setting-description">Choose how Kriptal looks on this device.</p></div><label class="sr-only" for="theme-select">Color theme</label><select id="theme-select"><option value="dark" ${theme === 'dark' ? 'selected' : ''}>Dark</option><option value="light" ${theme === 'light' ? 'selected' : ''}>Light</option></select></div><div class="setting-row"><div><h3>Log out</h3><p class="setting-description">Lock your vault. Your identity and contacts will remain saved on this device.</p></div><button class="secondary" id="logout">Log out</button></div><div class="setting-row"><div><h3>Wipe all app data</h3><p class="setting-description">Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.</p></div><button class="danger" id="wipe-data">Wipe all app data</button></div></section>`;
+    localizeElement(document.querySelector('#workspace'));
+    document.querySelector('#theme-select').addEventListener('change', (event) => {
+      theme = event.target.value;
+      localStorage.setItem('kriptal-theme', theme);
+      window.applyKriptalTheme(theme);
+    });
+    document.querySelector('#logout').addEventListener('click', logout);
+    document.querySelector('#wipe-data').addEventListener('click', wipeAppData);
+  }
+
+  function logout() {
+    session = null;
+    routeMessage = null;
+    routeKey = null;
+    pendingLaunchFiles.length = 0;
+    view = 'compose';
+    history.replaceState(null, '', location.pathname + location.search);
+    renderSetup();
+  }
+
+  async function wipeAppData() {
+    if (!confirm(translateText('Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.', language))) return;
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames
+            .filter((name) => name.startsWith('kriptal-'))
+            .map((name) => caches.delete(name))
+        );
+      }
+      if ('serviceWorker' in navigator) {
+        const appWorker = new URL(`${import.meta.env.BASE_URL}sw.js`, location.origin).href;
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        const appRegistrations = registrations.filter((registration) =>
+          [registration.active, registration.waiting, registration.installing]
+            .filter(Boolean)
+            .some((worker) => worker.scriptURL === appWorker)
+        );
+        await Promise.all(appRegistrations.map((registration) => registration.unregister()));
+      }
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith('kriptal'))
+        .forEach((key) => localStorage.removeItem(key));
+      sessionStorage.clear();
+    } catch (error) {
+      console.error('Could not wipe all Kriptal app data', error);
+      toastMessage('Could not wipe all app data');
+      return;
+    }
+
+    session = null;
+    routeMessage = null;
+    routeKey = null;
+    pendingLaunchFiles.length = 0;
+    view = 'compose';
+    language = 'en';
+    languageSelect.value = language;
+    theme = 'dark';
+    window.applyKriptalTheme(theme);
+    history.replaceState(null, '', location.pathname + location.search);
+    applyLanguage();
+    renderSetup();
+    toastMessage('All Kriptal app data was wiped');
   }
 
   function openImportContact() {
