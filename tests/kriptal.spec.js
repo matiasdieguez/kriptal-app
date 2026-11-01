@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { b64, decodePayload, encodeIdentityPayload, encodePayload } from '../common.js';
+import {
+  b64,
+  decodePayload,
+  encodeIdentityPayload,
+  encodeMessagePayload,
+  encodePayload
+} from '../common.js';
 
 const password = 'correct horse battery staple';
 
@@ -31,6 +37,40 @@ test('compact public identity links are smaller and legacy links still decode', 
   expect(decodePayload(legacy)).toEqual(payload);
 });
 
+test('compact message links round-trip through URL parsing and retain legacy support', () => {
+  const key = () => ({
+    crv: 'P-256',
+    ext: true,
+    key_ops: [],
+    kty: 'EC',
+    x: b64(new Uint8Array(32)),
+    y: b64(new Uint8Array(32))
+  });
+  const payload = {
+    v: 2,
+    id: b64(new Uint8Array(16)),
+    created: 1793560000000,
+    from: 'sender',
+    senderKey: key(),
+    signingKey: b64(new Uint8Array(1952)),
+    recipientKey: key(),
+    ephemeralKey: key(),
+    kemCipherText: b64(new Uint8Array(1088)),
+    salt: b64(new Uint8Array(32)),
+    iv: b64(new Uint8Array(12)),
+    data: b64(new Uint8Array(1200)),
+    signature: b64(new Uint8Array(3309))
+  };
+  const compact = encodeMessagePayload(payload);
+  const legacy = encodePayload(payload);
+  const link = `https://matiasdieguez.github.io/kriptal-app/#m=${compact}`;
+  const encoded = new URLSearchParams(new URL(link).hash.slice(1)).get('m');
+
+  expect(compact.length).toBeLessThan(legacy.length);
+  expect(decodePayload(encoded)).toEqual(payload);
+  expect(decodePayload(legacy)).toEqual(payload);
+});
+
 async function createIdentity(page, username) {
   await page.goto('/');
   await page.getByLabel('Your username').fill(username);
@@ -39,19 +79,41 @@ async function createIdentity(page, username) {
   await expect(page.locator('.user strong')).toHaveText(username);
 }
 
-async function importContact(page, link, pasteFromClipboard = false) {
+async function enableNativeFileShare(page) {
+  await page.addInitScript(() => {
+    window.__sharedFiles = [];
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: ({ files }) => Array.isArray(files) && files.length > 0
+    });
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async ({ files }) => {
+        const shared = await Promise.all(
+          files.map(async (file) => ({ name: file.name, contents: await file.text() }))
+        );
+        window.__sharedFiles.push(...shared);
+      }
+    });
+  });
+}
+
+async function shareIdentityFile(page) {
+  await page.getByRole('button', { name: 'Identity' }).click();
+  await page.getByRole('button', { name: 'Share public-key file' }).click();
+  await expect.poll(() => page.evaluate(() => window.__sharedFiles.length)).toBeGreaterThan(0);
+  return page.evaluate(() => window.__sharedFiles.pop());
+}
+
+async function importContact(page, identityFile) {
   await page.getByRole('button', { name: 'Contacts' }).click();
-  await page.getByRole('button', { name: 'Import public key link' }).click();
+  await page.getByRole('button', { name: 'Import public-key file' }).click();
   await expect(page.getByRole('heading', { name: 'Import a public identity' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Paste link' })).toBeVisible();
-  if (pasteFromClipboard) {
-    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-    await page.evaluate((value) => navigator.clipboard.writeText(value), link);
-    await page.getByRole('button', { name: 'Paste link' }).click();
-    await expect(page.getByLabel('Public-key link')).toHaveValue(link.trim());
-  } else {
-    await page.getByLabel('Public-key link').fill(link);
-  }
+  await page.getByLabel('Public-key file').setInputFiles({
+    name: identityFile.name,
+    mimeType: 'application/json',
+    buffer: Buffer.from(identityFile.contents)
+  });
   await page.getByRole('button', { name: 'Import contact' }).click();
 }
 
@@ -76,33 +138,35 @@ test('creates a local identity and unlocks it after reload', async ({ browser })
   await context.close();
 });
 
-test('exchanges identities and decrypts an encrypted message link', async ({ browser }) => {
+test('shares public-key files and decrypts an encrypted message file', async ({ browser }) => {
   const aliceContext = await browser.newContext();
   const bobContext = await browser.newContext();
   const alice = await aliceContext.newPage();
   const bob = await bobContext.newPage();
+  await enableNativeFileShare(alice);
+  await enableNativeFileShare(bob);
 
   await createIdentity(alice, 'alice');
-  await alice.getByRole('button', { name: 'Identity' }).click();
-  const aliceIdentityLink = await alice.locator('.code-box').innerText();
+  const aliceIdentityFile = await shareIdentityFile(alice);
 
   await createIdentity(bob, 'bob');
-  await bob.getByRole('button', { name: 'Identity' }).click();
-  const bobIdentityLink = await bob.locator('.code-box').innerText();
+  const bobIdentityFile = await shareIdentityFile(bob);
 
-  await importContact(alice, `  ${bobIdentityLink}\n`, true);
+  await importContact(alice, bobIdentityFile);
   await expect(alice.locator('.contact-row strong')).toHaveText('bob');
 
-  await importContact(bob, aliceIdentityLink);
+  await importContact(bob, aliceIdentityFile);
   await expect(bob.locator('.contact-row strong')).toHaveText('alice');
 
   await bob.getByRole('button', { name: 'Compose' }).click();
   await bob.locator('#recipient').selectOption({ label: 'alice' });
   await bob.locator('#message').fill('A message only Alice can read.');
-  await bob.getByRole('button', { name: 'Encrypt & create link' }).click();
+  await bob.getByRole('button', { name: 'Encrypt & create file' }).click();
   await expect(bob.locator('.modal')).toBeVisible();
-  const messageLink = await bob.locator('.modal .code-box').innerText();
-  expect(messageLink).toContain('#m=');
+  await bob.getByRole('button', { name: 'Share message file' }).click();
+  await expect.poll(() => bob.evaluate(() => window.__sharedFiles.length)).toBeGreaterThan(0);
+  const messageFile = await bob.evaluate(() => window.__sharedFiles.pop());
+  expect(messageFile.name).toBe('kriptal-message.json');
 
   const incoming = await aliceContext.newPage();
   await incoming.goto('/');
@@ -110,11 +174,12 @@ test('exchanges identities and decrypts an encrypted message link', async ({ bro
   await incoming.getByLabel('Vault password').fill(password);
   await incoming.getByRole('button', { name: 'Unlock Kriptal' }).click();
   await incoming.getByRole('button', { name: 'Open message' }).click();
-  await expect(incoming.getByRole('heading', { name: 'Decrypt a message link' })).toBeVisible();
-  await incoming.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-  await incoming.evaluate((value) => navigator.clipboard.writeText(value), messageLink);
-  await incoming.getByRole('button', { name: 'Paste link' }).click();
-  await expect(incoming.getByLabel('Encrypted message link')).toHaveValue(messageLink);
+  await expect(incoming.getByRole('heading', { name: 'Decrypt a message file' })).toBeVisible();
+  await incoming.getByLabel('Encrypted message file').setInputFiles({
+    name: messageFile.name,
+    mimeType: 'application/json',
+    buffer: Buffer.from(messageFile.contents)
+  });
   await incoming.getByRole('button', { name: 'Decrypt', exact: true }).click();
   await expect(incoming.getByText('Verified from bob')).toBeVisible();
   await expect(incoming.getByText('A message only Alice can read.')).toBeVisible();
@@ -123,34 +188,36 @@ test('exchanges identities and decrypts an encrypted message link', async ({ bro
   await bobContext.close();
 });
 
-test('imports a public-key link into an existing vault and exposes it to compose', async ({ browser }) => {
+test('imports public-key files into an existing vault and exposes contacts to compose', async ({ browser }) => {
   const aliceContext = await browser.newContext();
   const secondAliceContext = await browser.newContext();
   const bobContext = await browser.newContext();
   const alice = await aliceContext.newPage();
   const secondAlice = await secondAliceContext.newPage();
   const bob = await bobContext.newPage();
+  await enableNativeFileShare(alice);
+  await enableNativeFileShare(secondAlice);
 
   await createIdentity(alice, 'alice');
-  await alice.getByRole('button', { name: 'Identity' }).click();
-  const aliceIdentityLink = await alice.locator('.code-box').innerText();
+  const aliceIdentityFile = await shareIdentityFile(alice);
 
   await createIdentity(secondAlice, 'alice');
-  await secondAlice.getByRole('button', { name: 'Identity' }).click();
-  const secondAliceIdentityLink = await secondAlice.locator('.code-box').innerText();
+  const secondAliceIdentityFile = await shareIdentityFile(secondAlice);
 
   await createIdentity(bob, 'bob');
   const bobImportPage = await bobContext.newPage();
-  await bobImportPage.goto(aliceIdentityLink);
+  await enableNativeFileShare(bobImportPage);
+  await bobImportPage.goto('/');
   await expect(bobImportPage.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await bobImportPage.getByLabel('Vault password').fill(password);
   await bobImportPage.getByRole('button', { name: 'Unlock Kriptal' }).click();
+  await importContact(bobImportPage, aliceIdentityFile);
   await expect(bobImportPage.locator('.contact-row strong')).toHaveText('alice');
 
   await bobImportPage.getByRole('button', { name: 'Compose' }).click();
   await expect(bobImportPage.locator('#recipient option', { hasText: 'alice' })).toHaveCount(1);
 
-  await importContact(bobImportPage, secondAliceIdentityLink);
+  await importContact(bobImportPage, secondAliceIdentityFile);
   await expect(bobImportPage.locator('.contact-row strong')).toHaveCount(2);
   await bobImportPage.getByRole('button', { name: 'Compose' }).click();
   await expect(bobImportPage.locator('#recipient option')).toHaveCount(3);

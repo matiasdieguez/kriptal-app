@@ -4,15 +4,12 @@ import {
   VERSION,
   MAX_MESSAGE_BYTES,
   MAX_FILE_BYTES,
-  MAX_LINK_LENGTH,
   b64,
   bytes,
   fromJson,
   random,
   escapeHtml,
   readRoute,
-  decodePayload,
-  linkFor,
   storeRecord,
   storedRecord,
   isReplayed,
@@ -51,7 +48,7 @@ export function initUI({ app, toast }) {
 
   function renderSetup() {
     const hasAccount = Boolean(storedRecord());
-    app.innerHTML = `<section class="hero"><div><div class="eyebrow">Private communication, reimagined</div><h1>Your words.<br><em>Only your words.</em></h1><p class="lede">Kriptal turns messages and files into encrypted links. No inboxes, no accounts on a server, no trail to follow.</p></div><div class="hero-mark"><strong>Nothing leaves this device until you choose to share it.</strong></div></section><section class="panel auth-panel"><div class="panel-head"><div><div class="section-label">${hasAccount ? 'Welcome back' : 'Create your identity'}</div><h2>${hasAccount ? 'Unlock your vault' : 'Set up your local vault'}</h2></div><div class="section-label">01 / 03</div></div><div class="notice">Your password never leaves this browser. The vault uses AES-256-GCM. Messages use hybrid ML-KEM-768 + P-256 encryption and ML-DSA-65 sender authentication. There is no password reset.</div><form id="auth-form"><div class="form-grid">${!hasAccount ? '<div><label for="username">Your username</label><input id="username" name="username" required minlength="2" maxlength="32" placeholder="e.g. maren" autocomplete="username"></div>' : ''}<div class="${hasAccount ? 'full' : ''}"><label for="password">${hasAccount ? 'Vault password' : 'Choose a strong password'}</label><input id="password" name="password" type="password" required minlength="10" autocomplete="${hasAccount ? 'current-password' : 'new-password'}" placeholder="10 characters minimum"></div></div><div class="actions"><button type="submit">${hasAccount ? 'Unlock Kriptal' : 'Generate my identity'}</button>${hasAccount ? '<button type="button" class="danger" id="reset-account">Erase local vault</button>' : ''}</div></form></section>`;
+    app.innerHTML = `<section class="hero"><div><div class="eyebrow">Private communication, reimagined</div><h1>Your words.<br><em>Only your words.</em></h1><p class="lede">Kriptal encrypts messages and files for sharing. No inboxes, no accounts on a server, no trail to follow.</p></div><div class="hero-mark"><strong>Nothing leaves this device until you choose to share it.</strong></div></section><section class="panel auth-panel"><div class="panel-head"><div><div class="section-label">${hasAccount ? 'Welcome back' : 'Create your identity'}</div><h2>${hasAccount ? 'Unlock your vault' : 'Set up your local vault'}</h2></div><div class="section-label">01 / 03</div></div><div class="notice">Your password never leaves this browser. The vault uses AES-256-GCM. Messages use hybrid ML-KEM-768 + P-256 encryption and ML-DSA-65 sender authentication. There is no password reset.</div><form id="auth-form"><div class="form-grid">${!hasAccount ? '<div><label for="username">Your username</label><input id="username" name="username" required minlength="2" maxlength="32" placeholder="e.g. maren" autocomplete="username"></div>' : ''}<div class="${hasAccount ? 'full' : ''}"><label for="password">${hasAccount ? 'Vault password' : 'Choose a strong password'}</label><input id="password" name="password" type="password" required minlength="10" autocomplete="${hasAccount ? 'current-password' : 'new-password'}" placeholder="10 characters minimum"></div></div><div class="actions"><button type="submit">${hasAccount ? 'Unlock Kriptal' : 'Generate my identity'}</button>${hasAccount ? '<button type="button" class="danger" id="reset-account">Erase local vault</button>' : ''}</div></form></section>`;
     document.querySelector('#auth-form').addEventListener('submit', hasAccount ? unlock : setup);
     document.querySelector('#reset-account')?.addEventListener('click', () => {
       if (confirm('Erase your local identity and contacts? This cannot be undone.')) {
@@ -159,7 +156,7 @@ export function initUI({ app, toast }) {
       })
       .join('');
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Compose</div><h2>Make a private link</h2></div><div class="section-label">ML-KEM-768 / AES-256</div></div>${routeMessage ? `<div class="notice"><strong>Encrypted link detected.</strong> Verify the sender fingerprint against your saved contact before opening it.</div><div class="actions"><button id="decrypt-message">Verify & decrypt incoming link</button></div>` : ''}<form id="message-form"><div class="form-grid"><div><label for="recipient">Recipient</label><select id="recipient" required ${options ? '' : 'disabled'}><option value="">${options ? 'Choose a contact' : 'Add a contact first'}</option>${options}</select></div><div><label for="subject">Label (optional)</label><input id="subject" maxlength="80" placeholder="A note to yourself"></div><div class="full"><label for="message">Message</label><textarea id="message" maxlength="10000" placeholder="Write something only your contact can read..." required></textarea></div><div class="full"><label for="attachment">Attach a file (max 50 KB)</label><input id="attachment" type="file"></div></div><div class="actions"><button type="submit" ${options ? '' : 'disabled'}>Encrypt & create link</button><button type="button" class="secondary" id="clear-message">Clear</button></div></form></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Compose</div><h2>Make a private message</h2></div><div class="section-label">ML-KEM-768 / AES-256</div></div>${routeMessage ? `<div class="notice"><strong>Encrypted message detected.</strong> Verify the sender fingerprint against your saved contact before opening it.</div><div class="actions"><button id="decrypt-message">Verify & decrypt incoming message</button></div>` : ''}<form id="message-form"><div class="form-grid"><div><label for="recipient">Recipient</label><select id="recipient" required ${options ? '' : 'disabled'}><option value="">${options ? 'Choose a contact' : 'Add a contact first'}</option>${options}</select></div><div><label for="subject">Label (optional)</label><input id="subject" maxlength="80" placeholder="A note to yourself"></div><div class="full"><label for="message">Message</label><textarea id="message" maxlength="10000" placeholder="Write something only your contact can read..." required></textarea></div><div class="full"><label for="attachment">Attach a file (max 50 KB)</label><input id="attachment" type="file"></div></div><div class="actions"><button type="submit" ${options ? '' : 'disabled'}>Encrypt & create file</button><button type="button" class="secondary" id="clear-message">Clear</button></div></form></section>`;
     document.querySelector('#message-form').addEventListener('submit', createMessage);
     document
       .querySelector('#clear-message')
@@ -169,43 +166,34 @@ export function initUI({ app, toast }) {
 
   function renderOpenMessage() {
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Open a private message</div><h2>Decrypt a message link</h2></div><div class="section-label">Verify before opening</div></div><p class="lede">Paste the encrypted message link you received. The sender's identity and signature will be verified before the message is shown.</p><form id="message-link-form"><label for="message-link">Encrypted message link</label><textarea id="message-link" name="message-link" rows="5" required placeholder="Paste the Kriptal message link"></textarea><div class="actions"><button type="button" class="secondary paste-button" id="paste-message-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8a2 2 0 0 1 2 2V20H6V6.5a2 2 0 0 1 2-2Z"/><path d="M9 4V3h6v1m-6 7h6m-6 3h6"/></svg>Paste link</button></div><div class="actions"><button type="submit">Decrypt</button></div></form></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Open a private message</div><h2>Decrypt a message file</h2></div><div class="section-label">Verify before opening</div></div><p class="lede">Choose the encrypted Kriptal message file you received. The sender's identity and signature will be verified before the message is shown.</p><form id="message-file-form"><label for="message-file">Encrypted message file</label><input id="message-file" name="message-file" type="file" accept=".json,application/json" required><div class="actions"><button type="submit">Decrypt</button></div></form></section>`;
     document
-      .querySelector('#paste-message-link')
-      .addEventListener('click', pasteMessageLink);
-    document
-      .querySelector('#message-link-form')
-      .addEventListener('submit', decryptPastedLink);
+      .querySelector('#message-file-form')
+      .addEventListener('submit', decryptMessageFile);
   }
 
-  async function pasteMessageLink() {
-    try {
-      if (!navigator.clipboard?.readText)
-        throw new Error('Clipboard reading is not available in this browser');
-      const value = await navigator.clipboard.readText();
-      if (!value) return toastMessage('The clipboard is empty');
-      document.querySelector('#message-link').value = value.trim();
-    } catch (error) {
-      console.error('Could not read the encrypted message link from the clipboard', error);
-      toastMessage('Could not read clipboard. Paste the link into the text box.');
-    }
+  async function readExportFile(file, format) {
+    if (file.size > 200000) throw new Error('The selected file is too large');
+    const value = JSON.parse(await file.text());
+    if (value?.format !== format || value.version !== 1)
+      throw new Error('The selected file is not a supported Kriptal export');
+    return value.payload;
   }
 
-  async function decryptPastedLink(event) {
+  async function decryptMessageFile(event) {
     event.preventDefault();
-    const value = document.querySelector('#message-link').value.trim();
+    const file = document.querySelector('#message-file').files[0];
+    if (!file) return toastMessage('Choose an encrypted message file first');
     let payload;
     try {
-      const url = new URL(value);
-      const encoded = new URLSearchParams(url.hash.slice(1)).get('m');
-      if (!encoded) throw new Error('The link does not contain an encrypted message');
-      payload = decodePayload(encoded);
-    } catch {
-      toastMessage('That is not a valid Kriptal message link');
+      payload = await readExportFile(file, 'kriptal-encrypted-message');
+    } catch (error) {
+      console.error('Could not read the encrypted Kriptal message file', error);
+      toastMessage('That is not a valid Kriptal message file');
       return;
     }
     if (!validMessage(payload))
-      return toastMessage('This link is expired, malformed, or too large');
+      return toastMessage('This encrypted message file is expired or malformed');
     routeMessage = payload;
     await showDecrypt();
   }
@@ -219,7 +207,7 @@ export function initUI({ app, toast }) {
     if (textEncoder.encode(message).length > MAX_MESSAGE_BYTES)
       return toastMessage('Message is too large');
     const file = form.querySelector('#attachment').files[0];
-    if (file && file.size > MAX_FILE_BYTES) return toastMessage('File is too large for a link');
+    if (file && file.size > MAX_FILE_BYTES) return toastMessage('File is too large for a message file');
     const ephemeral = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, [
       'deriveBits'
     ]);
@@ -255,18 +243,18 @@ export function initUI({ app, toast }) {
     };
     const signature = await signPayload(unsigned, session.signingPrivateKey);
     const payload = { ...unsigned, signature };
-    const link = linkFor('m', payload);
-    if (link.length > MAX_LINK_LENGTH) return toastMessage('Generated link is too large');
-    showLink(
-      'Authenticated encrypted link ready',
-      link,
-      'The link expires in 7 days. Share it through any channel.'
+    showFileShare(
+      'Encrypted message file ready',
+      'The message is encrypted and signed. Share this file with your recipient.',
+      'kriptal-message.json',
+      'kriptal-encrypted-message',
+      payload
     );
   }
 
   function renderContacts() {
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your circle</div><h2>Contacts</h2></div><div class="section-label">${session.contacts.length} saved</div></div><div id="contact-list">${session.contacts.length ? session.contacts.map((contact, i) => `<div class="contact-row"><div class="contact-info"><div class="contact-initial">${escapeHtml(contact.username[0].toUpperCase())}</div><div><strong>${escapeHtml(contact.username)}</strong><p>${escapeHtml(contact.fingerprint || 'Fingerprint available after unlock')}</p></div></div><button class="danger" data-remove="${i}">Remove</button></div>`).join('') : '<div class="empty">No contacts yet. Import a public-key link to start a private conversation.</div>'}</div><div class="actions"><button id="import-contact">Import public key link</button></div></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your circle</div><h2>Contacts</h2></div><div class="section-label">${session.contacts.length} saved</div></div><div id="contact-list">${session.contacts.length ? session.contacts.map((contact, i) => `<div class="contact-row"><div class="contact-info"><div class="contact-initial">${escapeHtml(contact.username[0].toUpperCase())}</div><div><strong>${escapeHtml(contact.username)}</strong><p>${escapeHtml(contact.fingerprint || 'Fingerprint available after unlock')}</p></div></div><button class="danger" data-remove="${i}">Remove</button></div>`).join('') : '<div class="empty">Import a public-key file to start a private conversation.</div>'}</div><div class="actions"><button id="import-contact">Import public-key file</button></div></section>`;
     document.querySelector('#import-contact').addEventListener('click', openImportContact);
     app.querySelectorAll('[data-remove]').forEach((button) =>
       button.addEventListener('click', async () => {
@@ -279,64 +267,57 @@ export function initUI({ app, toast }) {
   }
 
   function renderIdentity() {
-    const publicLink = linkFor('k', {
+    const identity = {
       v: VERSION,
       username: session.username,
       publicKey: session.publicKey,
       kemPublicKey: session.kemPublicKey,
       signingPublicKey: session.signingPublicKey
-    });
+    };
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Share by link</div></div><div class="identity-share"><p class="lede">Share your public key as a link. It contains no private information and lets a contact encrypt messages for you.</p><div class="code-box">${escapeHtml(publicLink)}</div><div class="actions"><button id="copy-key">Copy public link</button><button class="secondary" id="share-key">Share link</button></div></div></section>`;
-    document.querySelector('#copy-key').addEventListener('click', () => copy(publicLink));
-    document.querySelector('#share-key').addEventListener('click', () => share(publicLink));
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Public-key file</div></div><div class="identity-share"><p class="lede">Share this public-key file so a contact can add you and encrypt messages for you. It contains no private information.</p><div class="actions"><button id="share-key">Share public-key file</button><button class="secondary" id="download-key">Download public-key file</button></div></div></section>`;
+    document.querySelector('#share-key').addEventListener('click', () =>
+      shareExportFile(
+        'kriptal-public-key.json',
+        'kriptal-public-identity',
+        identity,
+        'Kriptal public identity',
+        'Import this public-key file in Kriptal to add me as a contact.'
+      )
+    );
+    document.querySelector('#download-key').addEventListener('click', () =>
+      downloadExportFile('kriptal-public-key.json', 'kriptal-public-identity', identity)
+    );
   }
 
   function openImportContact() {
     view = 'import';
     renderApp();
-    document.querySelector('#contact-link').focus();
+    document.querySelector('#contact-file').focus();
   }
 
   function renderImportContact() {
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Add to your circle</div><h2>Import a public identity</h2></div><div class="section-label">Link only</div></div><p class="lede">Paste the public-key link your contact shared with you. It contains only public information.</p><form id="contact-import-form"><label for="contact-link">Public-key link</label><textarea id="contact-link" name="contact-link" rows="5" required placeholder="Paste your contact's Kriptal public-key link"></textarea><div class="actions"><button type="button" class="secondary paste-button" id="paste-contact-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8a2 2 0 0 1 2 2V20H6V6.5a2 2 0 0 1 2-2Z"/><path d="M9 4V3h6v1m-6 7h6m-6 3h6"/></svg>Paste link</button></div><div class="actions"><button type="submit">Import contact</button><button type="button" class="secondary" id="cancel-contact-import">Cancel</button></div></form></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Add to your circle</div><h2>Import a public identity</h2></div><div class="section-label">Public-key file</div></div><p class="lede">Choose the public-key file your contact shared with you. It contains only public information.</p><form id="contact-import-form"><label for="contact-file">Public-key file</label><input id="contact-file" name="contact-file" type="file" accept=".json,application/json" required><div class="actions"><button type="submit">Import contact</button><button type="button" class="secondary" id="cancel-contact-import">Cancel</button></div></form></section>`;
     document
       .querySelector('#contact-import-form')
-      .addEventListener('submit', submitContactImport);
-    document
-      .querySelector('#paste-contact-link')
-      .addEventListener('click', pasteContactLink);
+      .addEventListener('submit', importContactFile);
     document.querySelector('#cancel-contact-import').addEventListener('click', () => {
       view = 'contacts';
       renderApp();
     });
   }
 
-  async function pasteContactLink() {
-    try {
-      if (!navigator.clipboard?.readText)
-        throw new Error('Clipboard reading is not available in this browser');
-      const value = await navigator.clipboard.readText();
-      if (!value) return toastMessage('The clipboard is empty');
-      document.querySelector('#contact-link').value = value.trim();
-    } catch (error) {
-      console.error('Could not read the public-key link from the clipboard', error);
-      toastMessage('Could not read clipboard. Paste the link into the text box.');
-    }
-  }
-
-  async function submitContactImport(event) {
+  async function importContactFile(event) {
     event.preventDefault();
-    const value = document.querySelector('#contact-link').value.trim();
+    const file = document.querySelector('#contact-file').files[0];
+    if (!file) return toastMessage('Choose a public-key file first');
     let payload;
     try {
-      const url = new URL(value);
-      const encoded = new URLSearchParams(url.hash.slice(1)).get('k');
-      if (!encoded) throw new Error('The link does not contain a public key');
-      payload = decodePayload(encoded);
-    } catch {
-      toastMessage('That is not a valid Kriptal key link');
+      payload = await readExportFile(file, 'kriptal-public-identity');
+    } catch (error) {
+      console.error('Could not read the Kriptal public identity file', error);
+      toastMessage('That is not a valid Kriptal public-key file');
       return;
     }
     await importContact(payload);
@@ -349,7 +330,7 @@ export function initUI({ app, toast }) {
       JSON.stringify(payload.publicKey) === JSON.stringify(session.publicKey) &&
       payload.kemPublicKey === session.kemPublicKey &&
       payload.signingPublicKey === session.signingPublicKey;
-    if (isOwnIdentity) return toastMessage("That's your own identity link");
+    if (isOwnIdentity) return toastMessage("That's your own identity");
 
     const isAlreadySaved = session.contacts.some(
       (contact) =>
@@ -380,8 +361,8 @@ export function initUI({ app, toast }) {
 
   async function showDecrypt() {
     if (!validMessage(routeMessage))
-      return toastMessage('This link is expired, malformed, or too large');
-    if (isReplayed(routeMessage.id)) return toastMessage('This message link was already opened');
+      return toastMessage('This encrypted message is expired or malformed');
+    if (isReplayed(routeMessage.id)) return toastMessage('This message was already opened');
     const contact = session.contacts.find(
       (item) =>
         item.username === routeMessage.from &&
@@ -432,12 +413,22 @@ export function initUI({ app, toast }) {
     }
   }
 
-  function showLink(title, link, copyText) {
+  function showFileShare(title, description, fileName, format, payload) {
     showModal(
-      `<div class="section-label">${escapeHtml(title)}</div><h2>One link. Nothing else.</h2><p class="lede">${escapeHtml(copyText)}</p><div class="code-box">${escapeHtml(link)}</div><div class="actions"><button id="copy-result">Copy link</button><button id="share-result" class="secondary">Share</button><button id="close-modal" class="secondary">Close</button></div>`
+      `<div class="section-label">${escapeHtml(title)}</div><h2>Ready to share</h2><p class="lede">${escapeHtml(description)}</p><div class="notice">The message text and attachments are encrypted. The file also includes sender verification metadata.</div><div class="actions"><button id="share-message-file">Share message file</button><button id="download-message-file" class="secondary">Download file</button><button id="close-modal" class="secondary">Close</button></div>`
     );
-    document.querySelector('#copy-result').addEventListener('click', () => copy(link));
-    document.querySelector('#share-result').addEventListener('click', () => share(link));
+    document.querySelector('#share-message-file').addEventListener('click', () =>
+      shareExportFile(
+        fileName,
+        format,
+        payload,
+        'Kriptal encrypted message',
+        'Open this encrypted message file in Kriptal.'
+      )
+    );
+    document.querySelector('#download-message-file').addEventListener('click', () =>
+      downloadExportFile(fileName, format, payload)
+    );
   }
 
   function showModal(content) {
@@ -453,14 +444,36 @@ export function initUI({ app, toast }) {
     });
   }
 
-  async function copy(value) {
-    await navigator.clipboard.writeText(value);
-    toastMessage('Copied to clipboard');
+  function exportFile(fileName, format, payload) {
+    const contents = JSON.stringify({ format, version: 1, payload }, null, 2);
+    return new File([contents], fileName, { type: 'application/json' });
   }
 
-  async function share(value) {
-    if (navigator.share) await navigator.share({ title: 'Kriptal private link', text: value });
-    else copy(value);
+  function downloadExportFile(fileName, format, payload) {
+    const file = exportFile(fileName, format, payload);
+    const url = URL.createObjectURL(file);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toastMessage('File downloaded');
+  }
+
+  async function shareExportFile(fileName, format, payload, title, text) {
+    const file = exportFile(fileName, format, payload);
+    if (!navigator.share || !navigator.canShare?.({ files: [file] })) {
+      downloadExportFile(fileName, format, payload);
+      return;
+    }
+    try {
+      await navigator.share({ files: [file], title, text });
+      toastMessage('File shared');
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      console.error('Native file sharing failed', error);
+      downloadExportFile(fileName, format, payload);
+    }
   }
 
   if ('serviceWorker' in navigator)

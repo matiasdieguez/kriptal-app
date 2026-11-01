@@ -46,6 +46,7 @@ export function encodePayload(value) {
 export function decodePayload(value) {
   try {
     if (value.startsWith('id2.')) return decodeIdentityPayload(decodeBase85(value.slice(4)));
+    if (value.startsWith('m2.')) return decodeMessagePayload(decodeBase85(value.slice(3)));
     return fromJson(bytes(value));
   } catch {
     return null;
@@ -152,8 +153,145 @@ function decodeBase85(value) {
   return decoded;
 }
 
+export function encodeMessagePayload(value) {
+  const sender = [bytes(value.senderKey.x), bytes(value.senderKey.y)];
+  const recipient = [bytes(value.recipientKey.x), bytes(value.recipientKey.y)];
+  const ephemeral = [bytes(value.ephemeralKey.x), bytes(value.ephemeralKey.y)];
+  const from = textEncoder.encode(value.from);
+  const id = bytes(value.id);
+  const signingKey = bytes(value.signingKey);
+  const kemCipherText = bytes(value.kemCipherText);
+  const salt = bytes(value.salt);
+  const iv = bytes(value.iv);
+  const data = bytes(value.data);
+  const signature = bytes(value.signature);
+  const size =
+    13 +
+    2 + from.length +
+    id.length +
+    sender[0].length + sender[1].length +
+    4 + signingKey.length +
+    recipient[0].length + recipient[1].length +
+    ephemeral[0].length + ephemeral[1].length +
+    [kemCipherText, salt, iv, data, signature].reduce(
+      (total, field) => total + 4 + field.length,
+      0
+    );
+  const payload = new Uint8Array(size);
+  const view = new DataView(payload.buffer);
+  payload[0] = value.v;
+  view.setUint32(1, size);
+  view.setFloat64(5, value.created);
+  let offset = 13;
+  view.setUint16(offset, from.length);
+  offset += 2;
+  payload.set(from, offset);
+  offset += from.length;
+  for (const field of [id, ...sender]) {
+    payload.set(field, offset);
+    offset += field.length;
+  }
+  for (const field of [signingKey]) {
+    view.setUint32(offset, field.length);
+    offset += 4;
+    payload.set(field, offset);
+    offset += field.length;
+  }
+  for (const field of [...recipient, ...ephemeral]) {
+    payload.set(field, offset);
+    offset += field.length;
+  }
+  for (const field of [kemCipherText, salt, iv, data, signature]) {
+    view.setUint32(offset, field.length);
+    offset += 4;
+    payload.set(field, offset);
+    offset += field.length;
+  }
+  return `m2.${encodeBase85(payload)}`;
+}
+
+function decodeMessagePayload(payload) {
+  if (payload.length < 13) throw new Error('Malformed message link');
+  const view = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
+  const version = payload[0];
+  const payloadLength = view.getUint32(1);
+  if (payloadLength < 13 || payloadLength > payload.length)
+    throw new Error('Malformed message link');
+  const created = view.getFloat64(5);
+  payload = payload.subarray(0, payloadLength);
+  let offset = 13;
+
+  function readField(fixedLength = null) {
+    const length = fixedLength ?? new DataView(
+      payload.buffer,
+      payload.byteOffset + offset,
+      4
+    ).getUint32(0);
+    if (fixedLength === null) offset += 4;
+    if (offset + length > payload.length) throw new Error('Malformed message link');
+    const field = payload.slice(offset, offset + length);
+    offset += length;
+    return field;
+  }
+
+  if (offset + 2 > payload.length) throw new Error('Malformed message link');
+  const fromLength = new DataView(
+    payload.buffer,
+    payload.byteOffset + offset,
+    2
+  ).getUint16(0);
+  offset += 2;
+  const from = textDecoder.decode(readField(fromLength));
+  const id = readField(16);
+  const senderX = readField(32);
+  const senderY = readField(32);
+  const signingKey = readField(null);
+  const recipientX = readField(32);
+  const recipientY = readField(32);
+  const ephemeralX = readField(32);
+  const ephemeralY = readField(32);
+  const kemCipherText = readField(null);
+  const salt = readField(null);
+  const iv = readField(null);
+  const data = readField(null);
+  const signature = readField(null);
+  if (offset !== payload.length) throw new Error('Malformed message link');
+
+  function jwk(x, y) {
+    return {
+      crv: 'P-256',
+      ext: true,
+      key_ops: [],
+      kty: 'EC',
+      x: b64(x),
+      y: b64(y)
+    };
+  }
+
+  return {
+    v: version,
+    id: b64(id),
+    created,
+    from,
+    senderKey: jwk(senderX, senderY),
+    signingKey: b64(signingKey),
+    recipientKey: jwk(recipientX, recipientY),
+    ephemeralKey: jwk(ephemeralX, ephemeralY),
+    kemCipherText: b64(kemCipherText),
+    salt: b64(salt),
+    iv: b64(iv),
+    data: b64(data),
+    signature: b64(signature)
+  };
+}
+
 export function linkFor(type, value) {
-  const encoded = type === 'k' ? encodeIdentityPayload(value) : encodePayload(value);
+  const encoded =
+    type === 'k'
+      ? encodeIdentityPayload(value)
+      : type === 'm'
+        ? encodeMessagePayload(value)
+        : encodePayload(value);
   return `${location.origin}${location.pathname}#${type}=${encoded}`;
 }
 
