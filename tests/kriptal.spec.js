@@ -206,6 +206,10 @@ test('language selector translates the home page and information pages in all su
 test('landing page explains security, installation, and use with working illustrations', async ({ page }) => {
   await page.goto('/landing.html');
   await expect(page).toHaveTitle('Privacy is a Human Right | Kriptal');
+  await expect(page.locator('.landing-header .brand img')).toHaveJSProperty('complete', true);
+  await expect.poll(() =>
+    page.locator('.landing-header .brand img').evaluate((image) => image.naturalWidth)
+  ).toBeGreaterThan(0);
   await expect(page.getByRole('heading', { name: 'Your keys stay yours.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Good security is a shared habit.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Make Kriptal an app.' })).toBeVisible();
@@ -221,10 +225,17 @@ test('landing page explains security, installation, and use with working illustr
   const stylesheet = await page.request.get('/styles.css');
   expect(stylesheet.ok()).toBe(true);
   expect(await stylesheet.text()).toContain('.landing-hero');
+  await page.locator('#language-select').selectOption('es');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+  await expect(page.getByRole('heading', { name: 'Tus mensajes, protegidos.' })).toBeVisible();
 });
 
 test('plain-language FAQ explains key terms and practical security limits', async ({ page }) => {
   await page.goto('/faq.html');
+  await expect(page.locator('.brand img')).toHaveJSProperty('complete', true);
+  await expect.poll(() =>
+    page.locator('.brand img').evaluate((image) => image.naturalWidth)
+  ).toBeGreaterThan(0);
   await expect(page.getByRole('heading', { name: 'Frequently asked questions' })).toBeVisible();
   await page.getByText('Is Kriptal like a regular chat app?').click();
   await expect(page.getByText(/There are no Kriptal accounts, live chats, or message delivery servers/)).toBeVisible();
@@ -233,6 +244,12 @@ test('plain-language FAQ explains key terms and practical security limits', asyn
   await page.getByText('Does “post-quantum” mean Kriptal is future-proof?').click();
   await expect(page.getByText(/the complete app has not been independently audited/)).toBeVisible();
   await expect(page.getByRole('link', { name: 'Open Kriptal', exact: true })).toHaveAttribute('href', './');
+  await page.locator('#language-select').selectOption('es');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+  await expect(page.getByRole('heading', { name: 'Preguntas frecuentes' })).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#language-select')).toHaveValue('es');
+  await expect(page.getByRole('heading', { name: 'Preguntas frecuentes' })).toBeVisible();
 });
 
 async function createIdentity(page, username) {

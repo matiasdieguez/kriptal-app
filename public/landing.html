@@ -23,7 +23,22 @@
       <a href="#getting-started">How to use</a>
       <a href="./faq.html">FAQ</a>
     </nav>
-    <a class="landing-cta" href="./">Open Kriptal <span aria-hidden="true">→</span></a>
+    <div class="topbar-tools">
+      <label class="sr-only" for="language-select">Language</label>
+      <select id="language-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+        <option value="pt">Português</option>
+        <option value="nl">Nederlands</option>
+        <option value="fr">Français</option>
+        <option value="zh">中文</option>
+        <option value="ja">日本語</option>
+        <option value="ru">Русский</option>
+        <option value="eo">Esperanto</option>
+      </select>
+      <a class="landing-cta" href="./">Open Kriptal <span aria-hidden="true">→</span></a>
+    </div>
   </header>
 
   <main class="landing-shell">
@@ -162,5 +177,6 @@
     <div><a href="./">Open the app</a><a href="./?page=technical-details">Security details</a><a href="./legal.html">Legal notice</a><a href="https://github.com/matiasdieguez/kriptal-app" target="_blank" rel="noopener noreferrer">Open-source repository ↗</a></div>
     <p>Encryption helps protect messages; it cannot protect every device, sharing channel, or recipient.</p>
   </footer>
+  <script type="module" src="./page-localization.js"></script>
 </body>
 </html>

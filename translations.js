@@ -752,10 +752,165 @@ for (const [language, message] of Object.entries(downloadReadyText)) {
   ptExtra[language]['Download ready, now you can share the file'] = message;
 }
 
+const publicPageTranslations = {
+  es: {
+    'Language': 'Idioma',
+    'Security': 'Seguridad',
+    'Install': 'Instalar',
+    'How to use': 'Cómo usarlo',
+    FAQ: 'Preguntas frecuentes',
+    'Open Kriptal': 'Abrir Kriptal',
+    'About Kriptal': 'Acerca de Kriptal',
+    'Landing page navigation': 'Navegación de la página',
+    'Your messages,': 'Tus mensajes,',
+    'secured.': 'protegidos.',
+    'Your keys stay yours.': 'Tus claves son tuyas.',
+    'Good security is a shared habit.': 'La seguridad es un hábito compartido.',
+    'Make Kriptal an app.': 'Instala Kriptal como una app.',
+    'From first setup to a verified message.': 'Desde la configuración hasta un mensaje verificado.',
+    'Frequently asked questions': 'Preguntas frecuentes',
+    'Plain-language guide': 'Guía en lenguaje sencillo',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': '¿No conoces el cifrado? Empieza aquí. Explicamos los términos técnicos con palabras sencillas.',
+    'Identity, keys, and fingerprints': 'Identidad, claves y huellas digitales',
+    'Encryption terms, in everyday words': 'Términos de cifrado explicados',
+    'Your vault and your device': 'Tu bóveda y tu dispositivo',
+    'Sharing, message limits, and safety': 'Compartir, límites y seguridad'
+  },
+  it: {
+    Language: 'Lingua', Security: 'Sicurezza', Install: 'Installa', 'How to use': 'Come si usa',
+    FAQ: 'Domande frequenti',
+    'Open Kriptal': 'Apri Kriptal', 'About Kriptal': 'Informazioni su Kriptal',
+    'Your messages,': 'I tuoi messaggi,', 'secured.': 'al sicuro.',
+    'Your keys stay yours.': 'Le tue chiavi restano tue.',
+    'Good security is a shared habit.': 'La sicurezza è un’abitudine condivisa.',
+    'Make Kriptal an app.': 'Installa Kriptal come app.',
+    'From first setup to a verified message.': 'Dalla configurazione al messaggio verificato.',
+    'Frequently asked questions': 'Domande frequenti', 'Plain-language guide': 'Guida semplice',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': 'È la prima volta che usi la crittografia? Inizia da qui. Spieghiamo i termini tecnici con parole semplici.',
+    'Identity, keys, and fingerprints': 'Identità, chiavi e impronte digitali',
+    'Encryption terms, in everyday words': 'La crittografia spiegata in parole semplici',
+    'Your vault and your device': 'Il tuo archivio e il tuo dispositivo',
+    'Sharing, message limits, and safety': 'Condivisione, limiti dei messaggi e sicurezza'
+  },
+  pt: {
+    Language: 'Idioma', Security: 'Segurança', Install: 'Instalar', 'How to use': 'Como usar',
+    FAQ: 'Perguntas frequentes',
+    'Open Kriptal': 'Abrir o Kriptal', 'About Kriptal': 'Sobre o Kriptal',
+    'Your messages,': 'Suas mensagens,', 'secured.': 'protegidas.',
+    'Your keys stay yours.': 'Suas chaves continuam sendo suas.',
+    'Good security is a shared habit.': 'Segurança é um hábito compartilhado.',
+    'Make Kriptal an app.': 'Instale o Kriptal como um aplicativo.',
+    'From first setup to a verified message.': 'Da configuração à mensagem verificada.',
+    'Frequently asked questions': 'Perguntas frequentes', 'Plain-language guide': 'Guia em linguagem simples',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': 'Está começando com criptografia? Comece aqui. Explicamos os termos técnicos com palavras simples.',
+    'Identity, keys, and fingerprints': 'Identidade, chaves e impressões digitais',
+    'Encryption terms, in everyday words': 'Termos de criptografia em palavras simples',
+    'Your vault and your device': 'Seu cofre e seu dispositivo',
+    'Sharing, message limits, and safety': 'Compartilhamento, limites e segurança'
+  },
+  nl: {
+    Language: 'Taal', Security: 'Beveiliging', Install: 'Installeren', 'How to use': 'Zo gebruik je het',
+    FAQ: 'Veelgestelde vragen',
+    'Open Kriptal': 'Kriptal openen', 'About Kriptal': 'Over Kriptal',
+    'Your messages,': 'Je berichten,', 'secured.': 'beveiligd.',
+    'Your keys stay yours.': 'Je sleutels blijven van jou.',
+    'Good security is a shared habit.': 'Goede beveiliging is een gezamenlijke gewoonte.',
+    'Make Kriptal an app.': 'Maak van Kriptal een app.',
+    'From first setup to a verified message.': 'Van de eerste installatie tot een geverifieerd bericht.',
+    'Frequently asked questions': 'Veelgestelde vragen', 'Plain-language guide': 'Gids in duidelijke taal',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': 'Nieuw met versleuteling? Begin hier. Technische termen leggen we uit in gewone taal.',
+    'Identity, keys, and fingerprints': 'Identiteit, sleutels en vingerafdrukken',
+    'Encryption terms, in everyday words': 'Versleuteling in gewone woorden',
+    'Your vault and your device': 'Je kluis en je apparaat',
+    'Sharing, message limits, and safety': 'Delen, berichtlimieten en veiligheid'
+  },
+  fr: {
+    Language: 'Langue', Security: 'Sécurité', Install: 'Installer', 'How to use': 'Mode d’emploi',
+    FAQ: 'Questions fréquentes',
+    'Open Kriptal': 'Ouvrir Kriptal', 'About Kriptal': 'À propos de Kriptal',
+    'Your messages,': 'Vos messages,', 'secured.': 'protégés.',
+    'Your keys stay yours.': 'Vos clés restent les vôtres.',
+    'Good security is a shared habit.': 'La sécurité est une habitude partagée.',
+    'Make Kriptal an app.': 'Installez Kriptal comme une application.',
+    'From first setup to a verified message.': 'De la configuration au message vérifié.',
+    'Frequently asked questions': 'Questions fréquentes', 'Plain-language guide': 'Guide en langage simple',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': 'Vous découvrez le chiffrement ? Commencez ici. Les termes techniques sont expliqués simplement.',
+    'Identity, keys, and fingerprints': 'Identité, clés et empreintes',
+    'Encryption terms, in everyday words': 'Le chiffrement en termes simples',
+    'Your vault and your device': 'Votre coffre et votre appareil',
+    'Sharing, message limits, and safety': 'Partage, limites des messages et sécurité'
+  },
+  zh: {
+    Language: '语言', Security: '安全', Install: '安装', 'How to use': '使用方法',
+    FAQ: '常见问题',
+    'Open Kriptal': '打开 Kriptal', 'About Kriptal': '关于 Kriptal',
+    'Your messages,': '你的消息，', 'secured.': '安全无忧。',
+    'Your keys stay yours.': '密钥始终由你掌握。',
+    'Good security is a shared habit.': '良好的安全习惯需要共同坚持。',
+    'Make Kriptal an app.': '将 Kriptal 安装为应用。',
+    'From first setup to a verified message.': '从初次设置到验证消息。',
+    'Frequently asked questions': '常见问题', 'Plain-language guide': '通俗指南',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': '刚接触加密？从这里开始。我们会用通俗的语言解释技术术语。',
+    'Identity, keys, and fingerprints': '身份、密钥和指纹',
+    'Encryption terms, in everyday words': '通俗解释加密术语',
+    'Your vault and your device': '你的保险库和设备',
+    'Sharing, message limits, and safety': '分享、消息限制与安全'
+  },
+  ja: {
+    Language: '言語', Security: 'セキュリティ', Install: 'インストール', 'How to use': '使い方',
+    FAQ: 'よくある質問',
+    'Open Kriptal': 'Kriptal を開く', 'About Kriptal': 'Kriptal について',
+    'Your messages,': 'あなたのメッセージを、', 'secured.': '安全に。',
+    'Your keys stay yours.': '鍵はあなたの手元に。',
+    'Good security is a shared habit.': 'セキュリティは一緒に守る習慣です。',
+    'Make Kriptal an app.': 'Kriptal をアプリとして使う。',
+    'From first setup to a verified message.': '初期設定からメッセージの確認まで。',
+    'Frequently asked questions': 'よくある質問', 'Plain-language guide': 'やさしい言葉でのガイド',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': '暗号化を初めて使う方はこちらから。技術用語も日常的な言葉で説明します。',
+    'Identity, keys, and fingerprints': 'ID、鍵、フィンガープリント',
+    'Encryption terms, in everyday words': '暗号化用語をわかりやすく解説',
+    'Your vault and your device': '保管庫とデバイス',
+    'Sharing, message limits, and safety': '共有、メッセージの制限、安全性'
+  },
+  ru: {
+    Language: 'Язык', Security: 'Безопасность', Install: 'Установка', 'How to use': 'Как пользоваться',
+    FAQ: 'Часто задаваемые вопросы',
+    'Open Kriptal': 'Открыть Kriptal', 'About Kriptal': 'О Kriptal',
+    'Your messages,': 'Ваши сообщения,', 'secured.': 'под защитой.',
+    'Your keys stay yours.': 'Ваши ключи остаются у вас.',
+    'Good security is a shared habit.': 'Безопасность — общая привычка.',
+    'Make Kriptal an app.': 'Установите Kriptal как приложение.',
+    'From first setup to a verified message.': 'От первой настройки до проверенного сообщения.',
+    'Frequently asked questions': 'Часто задаваемые вопросы', 'Plain-language guide': 'Понятное руководство',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': 'Впервые пользуетесь шифрованием? Начните здесь. Мы объясняем технические термины простыми словами.',
+    'Identity, keys, and fingerprints': 'Идентификаторы, ключи и отпечатки',
+    'Encryption terms, in everyday words': 'Термины шифрования простыми словами',
+    'Your vault and your device': 'Ваше хранилище и устройство',
+    'Sharing, message limits, and safety': 'Обмен, ограничения сообщений и безопасность'
+  },
+  eo: {
+    Language: 'Lingvo', Security: 'Sekureco', Install: 'Instali', 'How to use': 'Kiel uzi',
+    FAQ: 'Oftaj demandoj',
+    'Open Kriptal': 'Malfermi Kriptal', 'About Kriptal': 'Pri Kriptal',
+    'Your messages,': 'Viaj mesaĝoj,', 'secured.': 'protektitaj.',
+    'Your keys stay yours.': 'Viaj ŝlosiloj restas viaj.',
+    'Good security is a shared habit.': 'Bona sekureco estas komuna kutimo.',
+    'Make Kriptal an app.': 'Instali Kriptal kiel aplikaĵon.',
+    'From first setup to a verified message.': 'De komenca agordo ĝis kontrolita mesaĝo.',
+    'Frequently asked questions': 'Oftaj demandoj', 'Plain-language guide': 'Klara gvidilo',
+    'New to encryption? Start here. Technical words are explained as they come up, in everyday language.': 'Ĉu vi novas pri ĉifrado? Komencu ĉi tie. Ni klarigas teknikajn vortojn per ĉiutaga lingvaĵo.',
+    'Identity, keys, and fingerprints': 'Identeco, ŝlosiloj kaj fingrospuroj',
+    'Encryption terms, in everyday words': 'Ĉifraj terminoj per simplaj vortoj',
+    'Your vault and your device': 'Via trezorejo kaj aparato',
+    'Sharing, message limits, and safety': 'Kunhavigo, mesaĝlimoj kaj sekureco'
+  }
+};
+
 export function translateText(value, language) {
   if (!language || language === 'en') return value;
   const dict = ptExtra[language] || {};
   if (dict[value]) return dict[value];
+  if (publicPageTranslations[language]?.[value]) return publicPageTranslations[language][value];
   if (value === 'Kriptal home') return translateAttribute(value, language);
   if (value.startsWith('Verified from ')) return `${translateText('Verified from', language)} ${value.slice('Verified from '.length)}`;
   if (value.startsWith('Download ')) return `${translateText('Download file', language)} ${value.slice('Download '.length)}`;

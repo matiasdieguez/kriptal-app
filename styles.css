@@ -638,6 +638,9 @@ button.danger {
   max-width: 1240px;
   gap: 24px;
 }
+.landing-header .topbar-tools {
+  gap: 12px;
+}
 .landing-header nav,
 .landing-footer > div {
   display: flex;
@@ -1046,7 +1049,7 @@ button.danger {
   .landing-header nav a {
     font-size: 11px;
   }
-  .landing-header > .landing-cta {
+  .landing-header .topbar-tools .landing-cta {
     margin-left: auto;
     padding: 11px 13px;
     font-size: 12px;
