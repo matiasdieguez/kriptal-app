@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A practical comparison of Kriptal's offline encrypted file exchange model with Signal, WhatsApp, and Telegram."
+    />
+    <meta
+      name="keywords"
+      content="encrypted messaging comparison, Kriptal vs Signal, WhatsApp, Telegram, end-to-end encryption"
+    />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://matiasdieguez.github.io/kriptal-app/faq.html"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="icon" href="./icon.png" />
+    <title>FAQ | Kriptal</title>
+  </head>
+  <body>
+    <div class="grain"></div>
+    <header class="topbar">
+      <a class="brand" href="./"
+        ><img src="./kriptal.png" alt="" /><span>KRIPTAL</span></a
+      >
+      <a class="back-link" href="./">Kriptal home</a>
+    </header>
+    <main class="shell">
+      <article class="info-page comparison-page">
+        <h2>FAQ</h2>
+        <h3>How does Kriptal ensure end-to-end encryption?</h3>
+        <p>
+          By design, Kriptal provides end-to-end encryption for messages
+          exchanged between Kriptal identities. The sender’s device encrypts
+          each message for the recipient before creating the shareable file;
+          there’s no Kriptal message server or relay. The message also carries a
+          sender signature. The implementation combines P-256 ECDH with
+          ML-KEM-768 to derive the encryption key, and uses ML-DSA-65 for
+          signatures (crypto.js, message creation). It is designed to resist
+          post-quantum attacks, but I wouldn’t claim it is proven “post-quantum
+          safe.” ML-KEM-768 and ML-DSA-65 are post-quantum algorithms, and the
+          message key combines ML-KEM with classical P-256. However, the whole
+          application has not been independently audited or formally verified.
+          Kriptal also does not provide a ratchet or forward secrecy: if a
+          recipient’s long-term private keys are later compromised, previously
+          saved message files may be at risk. For practical security, verify a
+          contact’s key fingerprint through a trusted separate channel, protect
+          your devices and vault password, and remember that a compromised
+          browser or app update could undermine encryption. These limits are
+          also described in the legal notice.
+        </p>
+      </article>
+    </main>
+  </body>
+</html>
