@@ -1,6 +1,6 @@
 # To-do list
 1.  Fix share buttons, to use host's sharing capabilities. Actually not working, only downloads file.
-2.  Add Dark theme as default.
+2.  Add Dark theme as default. Add a config page to change it, and change lang. and log out.
 3.  Remove technical details (alrorithms, etc.) from pages labels. 
 4.  Add more FAQs. Add FAQs link to details pages.
 5.  Add instructions to install. 
