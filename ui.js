@@ -116,7 +116,7 @@ export function initUI({ app, toast }) {
   }
 
   function renderApp() {
-    app.innerHTML = `<div class="dashboard"><aside class="side"><div class="user"><div class="section-label">Local identity</div><strong>${escapeHtml(session.username)}</strong><p class="section-label">ML-KEM-768 / P-256</p></div><nav aria-label="Main navigation"><button class="${view === 'compose' ? 'active' : ''}" data-view="compose" aria-label="Compose"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="nav-label">Compose</span></button><button class="${view === 'contacts' ? 'active' : ''}" data-view="contacts" aria-label="Contacts"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h2a5.5 5.5 0 0 1 5.5 5.5V20Zm12-15.5a3.5 3.5 0 0 1 0 7m2 2h.5a4.5 4.5 0 0 1 4.5 4.5V20h-3"/></svg><span class="nav-label">Contacts</span></button><button class="${view === 'identity' ? 'active' : ''}" data-view="identity" aria-label="Identity"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M5.5 16a3.5 3.5 0 0 1 7 0m3-5h3m-3 3h3"/></svg><span class="nav-label">Identity</span></button></nav></aside><section id="workspace"></section></div>`;
+    app.innerHTML = `<div class="dashboard"><aside class="side"><div class="user"><div class="section-label">Local identity</div><strong>${escapeHtml(session.username)}</strong><p class="section-label">ML-KEM-768 / P-256</p></div><nav aria-label="Main navigation"><button class="${view === 'compose' ? 'active' : ''}" data-view="compose" aria-label="Compose"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="nav-label">Compose</span></button><button class="${view === 'contacts' ? 'active' : ''}" data-view="contacts" aria-label="Contacts"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h2a5.5 5.5 0 0 1 5.5 5.5V20Zm12-15.5a3.5 3.5 0 0 1 0 7m2 2h.5a4.5 4.5 0 0 1 4.5 4.5V20h-3"/></svg><span class="nav-label">Contacts</span></button><button class="${view === 'open-message' ? 'active' : ''}" data-view="open-message" aria-label="Open message"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11.5h7m-3-3 3 3-3 3"/></svg><span class="nav-label">Open message</span></button><button class="${view === 'identity' ? 'active' : ''}" data-view="identity" aria-label="Identity"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M5.5 16a3.5 3.5 0 0 1 7 0m3-5h3m-3 3h3"/></svg><span class="nav-label">Identity</span></button></nav></aside><section id="workspace"></section></div>`;
     app.querySelectorAll('[data-view]').forEach((button) =>
       button.addEventListener('click', () => {
         view = button.dataset.view;
@@ -125,6 +125,7 @@ export function initUI({ app, toast }) {
     );
     if (view === 'compose') renderCompose();
     if (view === 'contacts') renderContacts();
+    if (view === 'open-message') renderOpenMessage();
     if (view === 'identity') renderIdentity();
     if (view === 'import') renderImportContact();
     openPendingLink();
@@ -164,6 +165,49 @@ export function initUI({ app, toast }) {
       .querySelector('#clear-message')
       .addEventListener('click', () => document.querySelector('#message-form').reset());
     document.querySelector('#decrypt-message')?.addEventListener('click', showDecrypt);
+  }
+
+  function renderOpenMessage() {
+    document.querySelector('#workspace').innerHTML =
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Open a private message</div><h2>Decrypt a message link</h2></div><div class="section-label">Verify before opening</div></div><p class="lede">Paste the encrypted message link you received. The sender's identity and signature will be verified before the message is shown.</p><form id="message-link-form"><label for="message-link">Encrypted message link</label><textarea id="message-link" name="message-link" rows="5" required placeholder="Paste the Kriptal message link"></textarea><div class="actions"><button type="button" class="secondary paste-button" id="paste-message-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8a2 2 0 0 1 2 2V20H6V6.5a2 2 0 0 1 2-2Z"/><path d="M9 4V3h6v1m-6 7h6m-6 3h6"/></svg>Paste link</button></div><div class="actions"><button type="submit">Decrypt</button></div></form></section>`;
+    document
+      .querySelector('#paste-message-link')
+      .addEventListener('click', pasteMessageLink);
+    document
+      .querySelector('#message-link-form')
+      .addEventListener('submit', decryptPastedLink);
+  }
+
+  async function pasteMessageLink() {
+    try {
+      if (!navigator.clipboard?.readText)
+        throw new Error('Clipboard reading is not available in this browser');
+      const value = await navigator.clipboard.readText();
+      if (!value) return toastMessage('The clipboard is empty');
+      document.querySelector('#message-link').value = value.trim();
+    } catch (error) {
+      console.error('Could not read the encrypted message link from the clipboard', error);
+      toastMessage('Could not read clipboard. Paste the link into the text box.');
+    }
+  }
+
+  async function decryptPastedLink(event) {
+    event.preventDefault();
+    const value = document.querySelector('#message-link').value.trim();
+    let payload;
+    try {
+      const url = new URL(value);
+      const encoded = new URLSearchParams(url.hash.slice(1)).get('m');
+      if (!encoded) throw new Error('The link does not contain an encrypted message');
+      payload = decodePayload(encoded);
+    } catch {
+      toastMessage('That is not a valid Kriptal message link');
+      return;
+    }
+    if (!validMessage(payload))
+      return toastMessage('This link is expired, malformed, or too large');
+    routeMessage = payload;
+    await showDecrypt();
   }
 
   async function createMessage(event) {

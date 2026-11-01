@@ -62,7 +62,7 @@ test('creates a local identity and unlocks it after reload', async ({ browser })
   await createIdentity(page, 'maren');
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   await expect(nav.getByText('Compose')).toBeVisible();
-  await expect(nav.locator('.nav-icon')).toHaveCount(3);
+  await expect(nav.locator('.nav-icon')).toHaveCount(4);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(nav.getByText('Compose')).toBeHidden();
   await expect(nav.locator('.nav-icon').first()).toBeVisible();
@@ -105,11 +105,17 @@ test('exchanges identities and decrypts an encrypted message link', async ({ bro
   expect(messageLink).toContain('#m=');
 
   const incoming = await aliceContext.newPage();
-  await incoming.goto(messageLink);
-  await expect(incoming).toHaveURL(/#m=/);
+  await incoming.goto('/');
   await expect(incoming.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await incoming.getByLabel('Vault password').fill(password);
   await incoming.getByRole('button', { name: 'Unlock Kriptal' }).click();
+  await incoming.getByRole('button', { name: 'Open message' }).click();
+  await expect(incoming.getByRole('heading', { name: 'Decrypt a message link' })).toBeVisible();
+  await incoming.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await incoming.evaluate((value) => navigator.clipboard.writeText(value), messageLink);
+  await incoming.getByRole('button', { name: 'Paste link' }).click();
+  await expect(incoming.getByLabel('Encrypted message link')).toHaveValue(messageLink);
+  await incoming.getByRole('button', { name: 'Decrypt', exact: true }).click();
   await expect(incoming.getByText('Verified from bob')).toBeVisible();
   await expect(incoming.getByText('A message only Alice can read.')).toBeVisible();
 
