@@ -724,6 +724,18 @@ const landingLinkText = {
   eo: 'Pri Kriptal'
 };
 
+const downloadReadyText = {
+  es: 'Descarga lista, ahora puedes compartir el archivo',
+  it: 'Download pronto, ora puoi condividere il file',
+  pt: 'Download pronto, agora você pode compartilhar o arquivo',
+  nl: 'Download gereed, je kunt het bestand nu delen',
+  fr: 'Téléchargement prêt, vous pouvez maintenant partager le fichier',
+  zh: '文件已准备好下载，现在可以分享了',
+  ja: 'ダウンロードの準備ができました。ファイルを共有できます',
+  ru: 'Файл готов к скачиванию, теперь вы можете им поделиться',
+  eo: 'La elŝuto estas preta; nun vi povas kunhavigi la dosieron'
+};
+
 for (const [language, headline] of Object.entries(homePageText)) {
   ptExtra[language]['Your messages, secured'] = headline;
 }
@@ -734,6 +746,10 @@ for (const [language, tagline] of Object.entries(privacyTagline)) {
 
 for (const [language, label] of Object.entries(landingLinkText)) {
   ptExtra[language]['Learn about Kriptal'] = label;
+}
+
+for (const [language, message] of Object.entries(downloadReadyText)) {
+  ptExtra[language]['Download ready, now you can share the file'] = message;
 }
 
 export function translateText(value, language) {

@@ -394,9 +394,9 @@ export function initUI({ app, toast }) {
     };
     const signature = await signPayload(unsigned, session.signingPrivateKey);
     const payload = { ...unsigned, signature };
-    showFileShare(
+    showFileDownload(
       'Encrypted message file ready',
-      'The message is encrypted and signed. Share this file with your recipient.',
+      'The message is encrypted and signed. Download the file, then share it with your recipient.',
       `${exportName(session.username)}-${fileDateTime()}.kriptalmsg`,
       'kriptal-encrypted-message',
       payload
@@ -426,16 +426,7 @@ export function initUI({ app, toast }) {
       signingPublicKey: session.signingPublicKey
     };
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Public-key file</div></div><div class="identity-share"><p class="lede">Share this public-key file so a contact can add you and encrypt messages for you. It contains no private information.</p><div class="actions"><button id="share-key">Share public-key file</button><button class="secondary" id="download-key">Download public-key file</button></div></div></section>`;
-    document.querySelector('#share-key').addEventListener('click', () =>
-      shareExportFile(
-        `${exportName(session.username)}.kriptalkey`,
-        'kriptal-public-identity',
-        identity,
-        'Kriptal public identity',
-        'Import this public-key file in Kriptal to add me as a contact.'
-      )
-    );
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Public-key file</div></div><div class="identity-share"><p class="lede">Download this public-key file and share it with a contact so they can add you and encrypt messages for you. It contains no private information.</p><div class="actions"><button id="download-key">Download public-key file</button></div></div></section>`;
     document.querySelector('#download-key').addEventListener('click', () =>
       downloadExportFile(`${exportName(session.username)}.kriptalkey`, 'kriptal-public-identity', identity)
     );
@@ -633,18 +624,9 @@ export function initUI({ app, toast }) {
     }
   }
 
-  function showFileShare(title, description, fileName, format, payload) {
+  function showFileDownload(title, description, fileName, format, payload) {
     showModal(
-      `<div class="section-label">${escapeHtml(title)}</div><h2>Ready to share</h2><p class="lede">${escapeHtml(description)}</p><div class="notice">The message text and attachments are encrypted. The file also includes sender verification metadata.</div><div class="actions"><button id="share-message-file">Share message file</button><button id="download-message-file" class="secondary">Download file</button><button id="close-modal" class="secondary">Close</button></div>`
-    );
-    document.querySelector('#share-message-file').addEventListener('click', () =>
-      shareExportFile(
-        fileName,
-        format,
-        payload,
-        'Kriptal encrypted message',
-        'Open this encrypted message file in Kriptal.'
-      )
+      `<div class="section-label">${escapeHtml(title)}</div><h2>Download encrypted file</h2><p class="lede">${escapeHtml(description)}</p><div class="notice">The message text and attachments are encrypted. The file also includes sender verification metadata.</div><div class="actions"><button id="download-message-file">Download file</button><button id="close-modal" class="secondary">Close</button></div>`
     );
     document.querySelector('#download-message-file').addEventListener('click', () =>
       downloadExportFile(fileName, format, payload)
@@ -693,23 +675,7 @@ export function initUI({ app, toast }) {
     anchor.download = fileName;
     anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toastMessage('File downloaded');
-  }
-
-  async function shareExportFile(fileName, format, payload, title, text) {
-    const file = exportFile(fileName, format, payload);
-    if (!navigator.share || !navigator.canShare?.({ files: [file] })) {
-      toastMessage('System file sharing is unavailable in this browser. Use the download button instead.');
-      return;
-    }
-    try {
-      await navigator.share({ files: [file], title, text });
-      toastMessage('File shared');
-    } catch (error) {
-      if (error.name === 'AbortError') return;
-      console.error('Native file sharing failed', error);
-      toastMessage('System file sharing is unavailable in this browser. Use the download button instead.');
-    }
+    toastMessage('Download ready, now you can share the file');
   }
 
   if ('serviceWorker' in navigator)

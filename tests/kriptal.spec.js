@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 import {
   b64,
   decodePayload,
@@ -238,9 +239,8 @@ async function createIdentity(page, username) {
   await expect(page.locator('.user strong')).toHaveText(username);
 }
 
-async function enableNativeFileShare(page) {
+async function enableFileLaunch(page) {
   await page.addInitScript(() => {
-    window.__sharedFiles = [];
     window.__launchConsumer = null;
     Object.defineProperty(window, 'launchQueue', {
       configurable: true,
@@ -248,23 +248,6 @@ async function enableNativeFileShare(page) {
         setConsumer: (consumer) => {
           window.__launchConsumer = consumer;
         }
-      }
-    });
-    Object.defineProperty(navigator, 'canShare', {
-      configurable: true,
-      value: ({ files }) => Array.isArray(files) && files.length > 0
-    });
-    Object.defineProperty(navigator, 'share', {
-      configurable: true,
-      value: async ({ files }) => {
-        const shared = await Promise.all(
-          files.map(async (file) => ({
-            name: file.name,
-            type: file.type,
-            contents: await file.text()
-          }))
-        );
-        window.__sharedFiles.push(...shared);
       }
     });
   });
@@ -287,11 +270,17 @@ async function launchFileToApp(page, file) {
   }, file);
 }
 
-async function shareIdentityFile(page) {
+async function downloadIdentityFile(page) {
   await page.getByRole('button', { name: 'Identity' }).click();
-  await page.getByRole('button', { name: 'Share public-key file' }).click();
-  await expect.poll(() => page.evaluate(() => window.__sharedFiles.length)).toBeGreaterThan(0);
-  return page.evaluate(() => window.__sharedFiles.pop());
+  await expect(page.getByRole('button', { name: 'Share public-key file' })).toHaveCount(0);
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download public-key file' }).click();
+  const download = await downloadPromise;
+  return {
+    name: download.suggestedFilename(),
+    type: 'application/json',
+    contents: await readFile(await download.path(), 'utf8')
+  };
 }
 
 async function importContact(page, identityFile) {
@@ -393,37 +382,32 @@ test('toast text remains dark and legible in both themes', async ({ page }) => {
   await expect(toast).toHaveCSS('background-color', 'rgb(244, 211, 107)');
 });
 
-test('share action reports unsupported system sharing instead of silently downloading', async ({ page }) => {
-  await page.addInitScript(() => {
-    window.__downloadCount = 0;
-    Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
-    Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined });
-    HTMLAnchorElement.prototype.click = function () {
-      if (this.hasAttribute('download')) window.__downloadCount += 1;
-    };
-  });
-  await createIdentity(page, 'share-test');
+test('public identity download is the only export action and shows sharing guidance', async ({ page }) => {
+  await createIdentity(page, 'download-test');
   await page.getByRole('button', { name: 'Identity' }).click();
-  await page.getByRole('button', { name: 'Share public-key file' }).click();
-  await expect(page.locator('#toast')).toContainText('System file sharing is unavailable');
-  expect(await page.evaluate(() => window.__downloadCount)).toBe(0);
+  await expect(page.getByRole('button', { name: 'Share public-key file' })).toHaveCount(0);
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download public-key file' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('download-test.kriptalkey');
+  await expect(page.locator('#toast')).toHaveText('Download ready, now you can share the file');
 });
 
-test('shares public-key files and decrypts an encrypted message file', async ({ browser }) => {
+test('downloads public-key files and opens an encrypted message file', async ({ browser }) => {
   const aliceContext = await browser.newContext();
   const bobContext = await browser.newContext();
   const alice = await aliceContext.newPage();
   const bob = await bobContext.newPage();
-  await enableNativeFileShare(alice);
-  await enableNativeFileShare(bob);
+  await enableFileLaunch(alice);
+  await enableFileLaunch(bob);
 
   await createIdentity(alice, 'alice');
-  const aliceIdentityFile = await shareIdentityFile(alice);
+  const aliceIdentityFile = await downloadIdentityFile(alice);
   expect(aliceIdentityFile.name).toBe('alice.kriptalkey');
   expect(aliceIdentityFile.type).toBe('application/json');
 
   await createIdentity(bob, 'bob');
-  const bobIdentityFile = await shareIdentityFile(bob);
+  const bobIdentityFile = await downloadIdentityFile(bob);
 
   expect(bobIdentityFile.name).toBe('bob.kriptalkey');
   await launchFileToApp(alice, bobIdentityFile);
@@ -438,14 +422,21 @@ test('shares public-key files and decrypts an encrypted message file', async ({ 
   await bob.locator('#message').fill('A message only Alice can read.');
   await bob.getByRole('button', { name: 'Encrypt & create file' }).click();
   await expect(bob.locator('.modal')).toBeVisible();
-  await bob.getByRole('button', { name: 'Share message file' }).click();
-  await expect.poll(() => bob.evaluate(() => window.__sharedFiles.length)).toBeGreaterThan(0);
-  const messageFile = await bob.evaluate(() => window.__sharedFiles.pop());
+  await expect(bob.getByRole('button', { name: 'Share message file' })).toHaveCount(0);
+  const messageDownloadPromise = bob.waitForEvent('download');
+  await bob.getByRole('button', { name: 'Download file' }).click();
+  const messageDownload = await messageDownloadPromise;
+  const messageFile = {
+    name: messageDownload.suggestedFilename(),
+    type: 'application/json',
+    contents: await readFile(await messageDownload.path(), 'utf8')
+  };
+  await expect(bob.locator('#toast')).toHaveText('Download ready, now you can share the file');
   expect(messageFile.name).toMatch(/^bob-\d{8}-\d{6}\.kriptalmsg$/);
   expect(messageFile.type).toBe('application/json');
 
   const incoming = await aliceContext.newPage();
-  await enableNativeFileShare(incoming);
+  await enableFileLaunch(incoming);
   await incoming.goto('/');
   await expect(incoming.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await incoming.getByLabel('Vault password').fill(password);
@@ -465,18 +456,18 @@ test('imports public-key files into an existing vault and exposes contacts to co
   const alice = await aliceContext.newPage();
   const secondAlice = await secondAliceContext.newPage();
   const bob = await bobContext.newPage();
-  await enableNativeFileShare(alice);
-  await enableNativeFileShare(secondAlice);
+  await enableFileLaunch(alice);
+  await enableFileLaunch(secondAlice);
 
   await createIdentity(alice, 'alice');
-  const aliceIdentityFile = await shareIdentityFile(alice);
+  const aliceIdentityFile = await downloadIdentityFile(alice);
 
   await createIdentity(secondAlice, 'alice');
-  const secondAliceIdentityFile = await shareIdentityFile(secondAlice);
+  const secondAliceIdentityFile = await downloadIdentityFile(secondAlice);
 
   await createIdentity(bob, 'bob');
   const bobImportPage = await bobContext.newPage();
-  await enableNativeFileShare(bobImportPage);
+  await enableFileLaunch(bobImportPage);
   await bobImportPage.goto('/');
   await expect(bobImportPage.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await bobImportPage.getByLabel('Vault password').fill(password);
