@@ -8,7 +8,6 @@ export const MAX_MESSAGE_AGE = 7 * 24 * 60 * 60 * 1000;
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
-const qrParts = new Map();
 
 export const b64 = (value) =>
   btoa(String.fromCharCode(...new Uint8Array(value)))
@@ -52,41 +51,6 @@ export function decodePayload(value) {
 
 export function linkFor(type, value) {
   return `${location.origin}${location.pathname}#${type}=${encodePayload(value)}`;
-}
-
-export function qrPartsFor(value) {
-  const encoded = encodePayload(value);
-  const chunkSize = 1500;
-  const id = b64(random(6));
-  const chunks = [];
-  for (let offset = 0; offset < encoded.length; offset += chunkSize)
-    chunks.push(encoded.slice(offset, offset + chunkSize));
-  return chunks.map((chunk, index) => `kr2.${id}.${index + 1}.${chunks.length}.${chunk}`);
-}
-
-export function readQrData(data) {
-  if (!data.startsWith('kr2.')) return data;
-  const [, id, indexText, totalText, chunk] = data.split('.');
-  const index = Number(indexText);
-  const total = Number(totalText);
-  if (
-    !id ||
-    !Number.isInteger(index) ||
-    !Number.isInteger(total) ||
-    index < 1 ||
-    index > total ||
-    !chunk ||
-    total > 20
-  )
-    return null;
-  const parts = qrParts.get(id) || { total, chunks: new Array(total) };
-  if (parts.total !== total) return null;
-  parts.chunks[index - 1] = chunk;
-  qrParts.set(id, parts);
-  if (parts.chunks.some((part) => !part))
-    return { pending: true, received: parts.chunks.filter(Boolean).length, total };
-  qrParts.delete(id);
-  return decodePayload(parts.chunks.join(''));
 }
 
 export function storeRecord(record) {

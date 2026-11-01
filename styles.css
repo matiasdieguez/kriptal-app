@@ -192,6 +192,23 @@ textarea {
   resize: vertical;
   line-height: 1.5;
 }
+#contact-link {
+  min-height: 150px;
+}
+.paste-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.paste-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
 input:focus,
 textarea:focus {
   border-color: var(--green);
@@ -274,10 +291,26 @@ button.danger {
 }
 .side nav button {
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: left;
   background: transparent;
   color: var(--muted);
   margin: 2px 0;
+}
+.nav-icon {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+.nav-label {
+  font-size: 14px;
 }
 .side nav button.active,
 .side nav button:hover {
@@ -331,88 +364,9 @@ button.danger {
   color: var(--green);
   line-height: 1.6;
 }
-.qr-wrap {
-  width: 220px;
-  margin: 20px auto;
-  padding: 12px;
-  background: white;
-}
-.qr-wrap canvas {
-  display: block;
-  width: 100% !important;
-  height: auto !important;
-}
-.identity-choice {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-.identity-choice button {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--line);
-}
-.identity-choice button.active {
-  background: var(--green);
-  color: white;
-  border-color: var(--green);
-}
-.identity-mode {
+.identity-share {
   border-top: 1px solid var(--line);
   padding-top: 22px;
-}
-.qr-toggle,
-.qr-panel-button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  background: transparent;
-  color: var(--green);
-  border: 1px solid var(--line);
-  text-align: left;
-  margin-top: 20px;
-}
-.qr-toggle span:last-child,
-.qr-panel-button span:last-child {
-  font-size: 20px;
-  line-height: 1;
-}
-.qr-pages {
-  display: none;
-  padding-top: 10px;
-}
-.qr-pages.open {
-  display: block;
-}
-.qr-page {
-  border-bottom: 1px solid var(--line);
-}
-.qr-panel-button {
-  margin-top: 8px;
-}
-.qr-panel-content {
-  display: none;
-  padding: 12px 0 18px;
-  text-align: center;
-}
-.qr-page.open .qr-panel-content {
-  display: block;
-}
-.qr-panel-content canvas {
-  display: block;
-  width: min(100%, 320px) !important;
-  height: auto !important;
-  margin: auto;
-  background: white;
-}
-.qr-video {
-  display: block;
-  width: 100%;
-  max-height: 55vh;
-  object-fit: cover;
-  background: #14211c;
 }
 .modal {
   position: fixed;
@@ -437,9 +391,6 @@ button.danger {
   font-size: 12px;
   line-height: 1.5;
   margin: 18px 0;
-}
-.hidden {
-  display: none !important;
 }
 .toast {
   position: fixed;
@@ -488,14 +439,15 @@ button.danger {
   }
   .side nav {
     display: flex;
+    gap: 4px;
   }
   .side nav button {
     width: auto;
+    justify-content: center;
     padding: 10px;
-    font-size: 0;
   }
-  .side nav button::first-letter {
-    font-size: 15px;
+  .side nav button .nav-label {
+    display: none;
   }
   .panel {
     padding: 23px 18px;

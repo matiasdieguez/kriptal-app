@@ -10,11 +10,34 @@ async function createIdentity(page, username) {
   await expect(page.locator('.user strong')).toHaveText(username);
 }
 
+async function importContact(page, link, pasteFromClipboard = false) {
+  await page.getByRole('button', { name: 'Contacts' }).click();
+  await page.getByRole('button', { name: 'Import public key link' }).click();
+  await expect(page.getByRole('heading', { name: 'Import a public identity' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Paste link' })).toBeVisible();
+  if (pasteFromClipboard) {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.evaluate((value) => navigator.clipboard.writeText(value), link);
+    await page.getByRole('button', { name: 'Paste link' }).click();
+    await expect(page.getByLabel('Public-key link')).toHaveValue(link.trim());
+  } else {
+    await page.getByLabel('Public-key link').fill(link);
+  }
+  await page.getByRole('button', { name: 'Import contact' }).click();
+}
+
 test('creates a local identity and unlocks it after reload', async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
 
   await createIdentity(page, 'maren');
+  const nav = page.getByRole('navigation', { name: 'Main navigation' });
+  await expect(nav.getByText('Compose')).toBeVisible();
+  await expect(nav.locator('.nav-icon')).toHaveCount(3);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(nav.getByText('Compose')).toBeHidden();
+  await expect(nav.locator('.nav-icon').first()).toBeVisible();
+  await expect(nav.getByRole('button', { name: 'Contacts' })).toBeVisible();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await page.getByLabel('Vault password').fill(password);
@@ -38,14 +61,10 @@ test('exchanges identities and decrypts an encrypted message link', async ({ bro
   await bob.getByRole('button', { name: 'Identity' }).click();
   const bobIdentityLink = await bob.locator('.code-box').innerText();
 
-  await alice.getByRole('button', { name: 'Contacts' }).click();
-  alice.once('dialog', dialog => dialog.accept(bobIdentityLink));
-  await alice.getByRole('button', { name: 'Import public key link' }).click();
+  await importContact(alice, `  ${bobIdentityLink}\n`, true);
   await expect(alice.locator('.contact-row strong')).toHaveText('bob');
 
-  await bob.getByRole('button', { name: 'Contacts' }).click();
-  bob.once('dialog', dialog => dialog.accept(aliceIdentityLink));
-  await bob.getByRole('button', { name: 'Import public key link' }).click();
+  await importContact(bob, aliceIdentityLink);
   await expect(bob.locator('.contact-row strong')).toHaveText('alice');
 
   await bob.getByRole('button', { name: 'Compose' }).click();
@@ -68,5 +87,49 @@ test('exchanges identities and decrypts an encrypted message link', async ({ bro
   await expect(incoming.getByText('A message only Alice can read.')).toBeVisible();
 
   await aliceContext.close();
+  await bobContext.close();
+});
+
+test('imports a public-key link into an existing vault and exposes it to compose', async ({ browser }) => {
+  const aliceContext = await browser.newContext();
+  const secondAliceContext = await browser.newContext();
+  const bobContext = await browser.newContext();
+  const alice = await aliceContext.newPage();
+  const secondAlice = await secondAliceContext.newPage();
+  const bob = await bobContext.newPage();
+
+  await createIdentity(alice, 'alice');
+  await alice.getByRole('button', { name: 'Identity' }).click();
+  const aliceIdentityLink = await alice.locator('.code-box').innerText();
+
+  await createIdentity(secondAlice, 'alice');
+  await secondAlice.getByRole('button', { name: 'Identity' }).click();
+  const secondAliceIdentityLink = await secondAlice.locator('.code-box').innerText();
+
+  await createIdentity(bob, 'bob');
+  const bobImportPage = await bobContext.newPage();
+  await bobImportPage.goto(aliceIdentityLink);
+  await expect(bobImportPage.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
+  await bobImportPage.getByLabel('Vault password').fill(password);
+  await bobImportPage.getByRole('button', { name: 'Unlock Kriptal' }).click();
+  await expect(bobImportPage.locator('.contact-row strong')).toHaveText('alice');
+
+  await bobImportPage.getByRole('button', { name: 'Compose' }).click();
+  await expect(bobImportPage.locator('#recipient option', { hasText: 'alice' })).toHaveCount(1);
+
+  await importContact(bobImportPage, secondAliceIdentityLink);
+  await expect(bobImportPage.locator('.contact-row strong')).toHaveCount(2);
+  await bobImportPage.getByRole('button', { name: 'Compose' }).click();
+  await expect(bobImportPage.locator('#recipient option')).toHaveCount(3);
+  await expect(bobImportPage.locator('#recipient option').filter({ hasText: /alice ·/ })).toHaveCount(2);
+
+  await bobImportPage.reload();
+  await bobImportPage.getByLabel('Vault password').fill(password);
+  await bobImportPage.getByRole('button', { name: 'Unlock Kriptal' }).click();
+  await bobImportPage.getByRole('button', { name: 'Compose' }).click();
+  await expect(bobImportPage.locator('#recipient option').filter({ hasText: /alice ·/ })).toHaveCount(2);
+
+  await aliceContext.close();
+  await secondAliceContext.close();
   await bobContext.close();
 });

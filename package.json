@@ -11,9 +11,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@noble/post-quantum": "^0.7.1",
-    "jsqr": "^1.4.0",
-    "qrcode": "^1.5.4"
+    "@noble/post-quantum": "^0.7.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

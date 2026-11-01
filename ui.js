@@ -1,5 +1,3 @@
-import QRCode from 'qrcode';
-import jsQR from 'jsqr';
 import {
   VAULT_KEY,
   REPLAY_KEY,
@@ -15,8 +13,6 @@ import {
   readRoute,
   decodePayload,
   linkFor,
-  qrPartsFor,
-  readQrData,
   storeRecord,
   storedRecord,
   isReplayed,
@@ -45,10 +41,6 @@ export function initUI({ app, toast }) {
   let view = 'compose';
   let routeMessage = readRoute('m');
   let routeKey = readRoute('k');
-  let cameraStream = null;
-  let cameraFrame = null;
-  let identityMode = 'send';
-  let qrPanelsOpen = false;
 
   function toastMessage(message) {
     toast.textContent = message;
@@ -123,7 +115,7 @@ export function initUI({ app, toast }) {
   }
 
   function renderApp() {
-    app.innerHTML = `<div class="dashboard"><aside class="side"><div class="user"><div class="section-label">Local identity</div><strong>${escapeHtml(session.username)}</strong><p class="section-label">ML-KEM-768 / P-256</p></div><nav><button class="${view === 'compose' ? 'active' : ''}" data-view="compose">Compose</button><button class="${view === 'contacts' ? 'active' : ''}" data-view="contacts">Contacts</button><button class="${view === 'identity' ? 'active' : ''}" data-view="identity">Identity</button></nav></aside><section id="workspace"></section></div>`;
+    app.innerHTML = `<div class="dashboard"><aside class="side"><div class="user"><div class="section-label">Local identity</div><strong>${escapeHtml(session.username)}</strong><p class="section-label">ML-KEM-768 / P-256</p></div><nav aria-label="Main navigation"><button class="${view === 'compose' ? 'active' : ''}" data-view="compose" aria-label="Compose"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="nav-label">Compose</span></button><button class="${view === 'contacts' ? 'active' : ''}" data-view="contacts" aria-label="Contacts"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h2a5.5 5.5 0 0 1 5.5 5.5V20Zm12-15.5a3.5 3.5 0 0 1 0 7m2 2h.5a4.5 4.5 0 0 1 4.5 4.5V20h-3"/></svg><span class="nav-label">Contacts</span></button><button class="${view === 'identity' ? 'active' : ''}" data-view="identity" aria-label="Identity"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M5.5 16a3.5 3.5 0 0 1 7 0m3-5h3m-3 3h3"/></svg><span class="nav-label">Identity</span></button></nav></aside><section id="workspace"></section></div>`;
     app.querySelectorAll('[data-view]').forEach((button) =>
       button.addEventListener('click', () => {
         view = button.dataset.view;
@@ -133,12 +125,22 @@ export function initUI({ app, toast }) {
     if (view === 'compose') renderCompose();
     if (view === 'contacts') renderContacts();
     if (view === 'identity') renderIdentity();
+    if (view === 'import') renderImportContact();
     if (routeKey) importContact(routeKey);
   }
 
   function renderCompose() {
     const options = session.contacts
-      .map((contact, i) => `<option value="${i}">${escapeHtml(contact.username)}</option>`)
+      .map((contact, i) => {
+        const sameName = session.contacts.filter(
+          (item) => item.username === contact.username
+        ).length > 1;
+        const fingerprint = contact.fingerprint?.replaceAll(' ', '').slice(0, 8);
+        const label = sameName
+          ? `${contact.username} · ${fingerprint || `contact ${i + 1}`}`
+          : contact.username;
+        return `<option value="${i}">${escapeHtml(label)}</option>`;
+      })
       .join('');
     document.querySelector('#workspace').innerHTML =
       `<section class="panel"><div class="panel-head"><div><div class="section-label">Compose</div><h2>Make a private link</h2></div><div class="section-label">ML-KEM-768 / AES-256</div></div>${routeMessage ? `<div class="notice"><strong>Encrypted link detected.</strong> Verify the sender fingerprint against your saved contact before opening it.</div><div class="actions"><button id="decrypt-message">Verify & decrypt incoming link</button></div>` : ''}<form id="message-form"><div class="form-grid"><div><label for="recipient">Recipient</label><select id="recipient" required ${options ? '' : 'disabled'}><option value="">${options ? 'Choose a contact' : 'Add a contact first'}</option>${options}</select></div><div><label for="subject">Label (optional)</label><input id="subject" maxlength="80" placeholder="A note to yourself"></div><div class="full"><label for="message">Message</label><textarea id="message" maxlength="10000" placeholder="Write something only your contact can read..." required></textarea></div><div class="full"><label for="attachment">Attach a file (max 50 KB)</label><input id="attachment" type="file"></div></div><div class="actions"><button type="submit" ${options ? '' : 'disabled'}>Encrypt & create link</button><button type="button" class="secondary" id="clear-message">Clear</button></div></form></section>`;
@@ -205,13 +207,8 @@ export function initUI({ app, toast }) {
 
   function renderContacts() {
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your circle</div><h2>Contacts</h2></div><div class="section-label">${session.contacts.length} saved</div></div><div id="contact-list">${session.contacts.length ? session.contacts.map((contact, i) => `<div class="contact-row"><div class="contact-info"><div class="contact-initial">${escapeHtml(contact.username[0].toUpperCase())}</div><div><strong>${escapeHtml(contact.username)}</strong><p>${escapeHtml(contact.fingerprint || 'Fingerprint available after unlock')}</p></div></div><button class="danger" data-remove="${i}">Remove</button></div>`).join('') : '<div class="empty">No contacts yet. Import a public-key link or scan a QR code to start a private conversation.</div>'}</div><div class="actions"><button id="import-contact">Import public key link</button><button class="secondary" id="scan-qr">Scan QR image</button><button class="secondary" id="camera-qr">Use camera</button></div><input id="contact-file" type="file" accept="image/*" class="hidden"></section>`;
-    document.querySelector('#import-contact').addEventListener('click', importPrompt);
-    document
-      .querySelector('#scan-qr')
-      .addEventListener('click', () => document.querySelector('#contact-file').click());
-    document.querySelector('#contact-file').addEventListener('change', scanQrFile);
-    document.querySelector('#camera-qr').addEventListener('click', startCamera);
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your circle</div><h2>Contacts</h2></div><div class="section-label">${session.contacts.length} saved</div></div><div id="contact-list">${session.contacts.length ? session.contacts.map((contact, i) => `<div class="contact-row"><div class="contact-info"><div class="contact-initial">${escapeHtml(contact.username[0].toUpperCase())}</div><div><strong>${escapeHtml(contact.username)}</strong><p>${escapeHtml(contact.fingerprint || 'Fingerprint available after unlock')}</p></div></div><button class="danger" data-remove="${i}">Remove</button></div>`).join('') : '<div class="empty">No contacts yet. Import a public-key link to start a private conversation.</div>'}</div><div class="actions"><button id="import-contact">Import public key link</button></div></section>`;
+    document.querySelector('#import-contact').addEventListener('click', openImportContact);
     app.querySelectorAll('[data-remove]').forEach((button) =>
       button.addEventListener('click', async () => {
         session.contacts.splice(Number(button.dataset.remove), 1);
@@ -230,81 +227,78 @@ export function initUI({ app, toast }) {
       kemPublicKey: session.kemPublicKey,
       signingPublicKey: session.signingPublicKey
     });
-    const keyBundle = {
-      v: VERSION,
-      username: session.username,
-      publicKey: session.publicKey,
-      kemPublicKey: session.kemPublicKey,
-      signingPublicKey: session.signingPublicKey
-    };
-    const qrPartsList = qrPartsFor(keyBundle);
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Choose exchange method</div></div><div class="identity-choice" role="tablist" aria-label="Identity exchange method"><button class="${identityMode === 'send' ? 'active' : ''}" id="send-identity" role="tab" aria-selected="${identityMode === 'send'}">Send public link</button><button class="${identityMode === 'scan' ? 'active' : ''}" id="scan-identity" role="tab" aria-selected="${identityMode === 'scan'}">Scan a QR key</button></div>${identityMode === 'send' ? `<div class="identity-mode"><p class="lede">Share your public key as a link. It contains no private information and lets a contact encrypt messages for you.</p><div class="code-box">${escapeHtml(publicLink)}</div><div class="actions"><button id="copy-key">Copy public link</button><button class="secondary" id="share-key">Share link</button></div><button class="qr-toggle" id="toggle-qr" aria-expanded="${qrPanelsOpen}"><span>${qrPanelsOpen ? 'Hide' : 'Show'} QR panels</span><span aria-hidden="true">${qrPanelsOpen ? '−' : '+'}</span></button><div id="public-qrs" class="qr-pages ${qrPanelsOpen ? 'open' : ''}"></div></div>` : `<div class="identity-mode"><p class="lede">Scan every panel of a contact's QR key. The panels are collected automatically and verified before the contact is saved.</p><div class="actions"><button id="camera-qr">Use camera</button><button class="secondary" id="scan-qr">Scan QR image</button></div><input id="contact-file" type="file" accept="image/*" class="hidden"></div>`}</section>`;
-    document.querySelector('#send-identity').addEventListener('click', () => {
-      identityMode = 'send';
-      renderIdentity();
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Share by link</div></div><div class="identity-share"><p class="lede">Share your public key as a link. It contains no private information and lets a contact encrypt messages for you.</p><div class="code-box">${escapeHtml(publicLink)}</div><div class="actions"><button id="copy-key">Copy public link</button><button class="secondary" id="share-key">Share link</button></div></div></section>`;
+    document.querySelector('#copy-key').addEventListener('click', () => copy(publicLink));
+    document.querySelector('#share-key').addEventListener('click', () => share(publicLink));
+  }
+
+  function openImportContact() {
+    view = 'import';
+    renderApp();
+    document.querySelector('#contact-link').focus();
+  }
+
+  function renderImportContact() {
+    document.querySelector('#workspace').innerHTML =
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Add to your circle</div><h2>Import a public identity</h2></div><div class="section-label">Link only</div></div><p class="lede">Paste the public-key link your contact shared with you. It contains only public information.</p><form id="contact-import-form"><label for="contact-link">Public-key link</label><textarea id="contact-link" name="contact-link" rows="5" required placeholder="Paste your contact's Kriptal public-key link"></textarea><div class="actions"><button type="button" class="secondary paste-button" id="paste-contact-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8a2 2 0 0 1 2 2V20H6V6.5a2 2 0 0 1 2-2Z"/><path d="M9 4V3h6v1m-6 7h6m-6 3h6"/></svg>Paste link</button></div><div class="actions"><button type="submit">Import contact</button><button type="button" class="secondary" id="cancel-contact-import">Cancel</button></div></form></section>`;
+    document
+      .querySelector('#contact-import-form')
+      .addEventListener('submit', submitContactImport);
+    document
+      .querySelector('#paste-contact-link')
+      .addEventListener('click', pasteContactLink);
+    document.querySelector('#cancel-contact-import').addEventListener('click', () => {
+      view = 'contacts';
+      renderApp();
     });
-    document.querySelector('#scan-identity').addEventListener('click', () => {
-      identityMode = 'scan';
-      renderIdentity();
-    });
-    if (identityMode === 'send') {
-      document.querySelector('#copy-key').addEventListener('click', () => copy(publicLink));
-      document.querySelector('#share-key').addEventListener('click', () => share(publicLink));
-      document.querySelector('#toggle-qr').addEventListener('click', () => {
-        qrPanelsOpen = !qrPanelsOpen;
-        renderIdentity();
-      });
-      if (qrPanelsOpen) {
-        const qrContainer = document.querySelector('#public-qrs');
-        qrPartsList.forEach((part, index) => {
-          const page = document.createElement('div');
-          page.className = 'qr-page';
-          page.innerHTML = `<button class="qr-panel-button" aria-expanded="false"><span>Panel ${index + 1} of ${qrPartsList.length}</span><span aria-hidden="true">+</span></button><div class="qr-panel-content"><canvas></canvas></div>`;
-          qrContainer.appendChild(page);
-          const button = page.querySelector('.qr-panel-button');
-          button.addEventListener('click', () => {
-            const open = page.classList.toggle('open');
-            button.setAttribute('aria-expanded', open);
-            button.lastElementChild.textContent = open ? '−' : '+';
-          });
-          QRCode.toCanvas(page.querySelector('canvas'), part, {
-            width: 320,
-            margin: 1,
-            errorCorrectionLevel: 'M',
-            color: { dark: '#184d3a', light: '#ffffff' }
-          }).catch(() => toastMessage('This QR panel could not be generated'));
-        });
-      }
-    } else {
-      document.querySelector('#camera-qr').addEventListener('click', startCamera);
-      document
-        .querySelector('#scan-qr')
-        .addEventListener('click', () => document.querySelector('#contact-file').click());
-      document.querySelector('#contact-file').addEventListener('change', scanQrFile);
+  }
+
+  async function pasteContactLink() {
+    try {
+      if (!navigator.clipboard?.readText)
+        throw new Error('Clipboard reading is not available in this browser');
+      const value = await navigator.clipboard.readText();
+      if (!value) return toastMessage('The clipboard is empty');
+      document.querySelector('#contact-link').value = value.trim();
+    } catch (error) {
+      console.error('Could not read the public-key link from the clipboard', error);
+      toastMessage('Could not read clipboard. Paste the link into the text box.');
     }
   }
 
-  async function importPrompt() {
-    const value = prompt("Paste your contact's Kriptal public-key link:");
-    if (value) {
-      try {
-        const url = new URL(value);
-        const payload = decodePayload(new URLSearchParams(url.hash.slice(1)).get('k'));
-        await importContact(payload);
-      } catch {
-        toastMessage('That is not a valid Kriptal key link');
-      }
+  async function submitContactImport(event) {
+    event.preventDefault();
+    const value = document.querySelector('#contact-link').value.trim();
+    let payload;
+    try {
+      const url = new URL(value);
+      const encoded = new URLSearchParams(url.hash.slice(1)).get('k');
+      if (!encoded) throw new Error('The link does not contain a public key');
+      payload = decodePayload(encoded);
+    } catch {
+      toastMessage('That is not a valid Kriptal key link');
+      return;
     }
+    await importContact(payload);
   }
 
   async function importContact(payload) {
     if (!validContact(payload))
       return toastMessage('That public key bundle is invalid or outdated');
-    if (
-      payload.username === session.username ||
-      session.contacts.some((contact) => contact.username === payload.username)
-    ) {
+    const isOwnIdentity =
+      JSON.stringify(payload.publicKey) === JSON.stringify(session.publicKey) &&
+      payload.kemPublicKey === session.kemPublicKey &&
+      payload.signingPublicKey === session.signingPublicKey;
+    if (isOwnIdentity) return toastMessage("That's your own identity link");
+
+    const isAlreadySaved = session.contacts.some(
+      (contact) =>
+        JSON.stringify(contact.publicKey) === JSON.stringify(payload.publicKey) &&
+        contact.kemPublicKey === payload.kemPublicKey &&
+        contact.signingPublicKey === payload.signingPublicKey
+    );
+    if (isAlreadySaved) {
       toastMessage('That contact is already saved');
       return;
     }
@@ -324,93 +318,21 @@ export function initUI({ app, toast }) {
     toastMessage(`${payload.username} added · ${contact.fingerprint}`);
   }
 
-  async function handleQrScan(data) {
-    try {
-      const reconstructed = readQrData(data);
-      if (reconstructed?.pending)
-        return toastMessage(
-          `QR panel ${reconstructed.received} of ${reconstructed.total} received`
-        );
-      if (reconstructed) return importContact(reconstructed);
-      const url = new URL(data);
-      const payload = decodePayload(new URLSearchParams(url.hash.slice(1)).get('k'));
-      await importContact(payload);
-    } catch {
-      toastMessage('That QR code is not a Kriptal public key');
-    }
-  }
-
-  async function scanQrFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const image = await createImageBitmap(file);
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0);
-    const result = jsQR(
-      context.getImageData(0, 0, canvas.width, canvas.height).data,
-      canvas.width,
-      canvas.height
-    );
-    if (!result) return toastMessage('No readable QR code found');
-    await handleQrScan(result.data);
-  }
-
-  async function startCamera() {
-    if (!navigator.mediaDevices?.getUserMedia) return toastMessage('Camera access is unavailable');
-    showModal(
-      '<div class="section-label">Camera scanner</div><h2>Scan Kriptal key panels</h2><video id="qr-video" autoplay playsinline class="qr-video"></video><div class="actions"><button class="secondary" id="close-modal">Cancel</button></div>'
-    );
-    try {
-      cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } }
-      });
-      const video = document.querySelector('#qr-video');
-      video.srcObject = cameraStream;
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      const scan = () => {
-        if (!document.body.contains(video)) return;
-        if (video.readyState >= 2) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context.drawImage(video, 0, 0);
-          const result = jsQR(
-            context.getImageData(0, 0, canvas.width, canvas.height).data,
-            canvas.width,
-            canvas.height
-          );
-          if (result) handleQrScan(result.data);
-        }
-        cameraFrame = requestAnimationFrame(scan);
-      };
-      scan();
-    } catch {
-      toastMessage('Camera permission was not granted');
-      stopCamera();
-    }
-  }
-
-  function stopCamera() {
-    if (cameraFrame) cancelAnimationFrame(cameraFrame);
-    cameraStream?.getTracks().forEach((track) => track.stop());
-    cameraStream = null;
-    cameraFrame = null;
-  }
-
   async function showDecrypt() {
     if (!validMessage(routeMessage))
       return toastMessage('This link is expired, malformed, or too large');
     if (isReplayed(routeMessage.id)) return toastMessage('This message link was already opened');
-    const contact = session.contacts.find((item) => item.username === routeMessage.from);
-    if (!contact) return importPrompt();
-    if (
-      JSON.stringify(contact.publicKey) !== JSON.stringify(routeMessage.senderKey) ||
-      JSON.stringify(contact.signingPublicKey) !== JSON.stringify(routeMessage.signingKey)
-    )
-      return toastMessage('Sender key does not match the saved contact');
+    const contact = session.contacts.find(
+      (item) =>
+        item.username === routeMessage.from &&
+        JSON.stringify(item.publicKey) === JSON.stringify(routeMessage.senderKey) &&
+        item.signingPublicKey === routeMessage.signingKey
+    );
+    if (!contact) {
+      if (session.contacts.some((item) => item.username === routeMessage.from))
+        return toastMessage('Sender key does not match the saved contact');
+      return openImportContact();
+    }
     if (JSON.stringify(routeMessage.recipientKey) !== JSON.stringify(session.publicKey))
       return toastMessage('This message is for another identity');
     try {
@@ -459,13 +381,9 @@ export function initUI({ app, toast }) {
     modal.className = 'modal';
     modal.innerHTML = `<div class="panel">${content}</div>`;
     document.body.appendChild(modal);
-    modal.querySelector('#close-modal')?.addEventListener('click', () => {
-      stopCamera();
-      modal.remove();
-    });
+    modal.querySelector('#close-modal')?.addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (event) => {
       if (event.target === modal) {
-        stopCamera();
         modal.remove();
       }
     });
