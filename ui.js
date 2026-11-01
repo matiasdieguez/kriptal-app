@@ -667,11 +667,7 @@ export function initUI({ app, toast }) {
 
   function exportFile(fileName, format, payload) {
     const contents = JSON.stringify({ format, version: 1, payload }, null, 2);
-    const type =
-      format === 'kriptal-public-identity'
-        ? 'application/vnd.kriptal.public-key+json'
-        : 'application/vnd.kriptal.encrypted-message+json';
-    return new File([contents], fileName, { type });
+    return new File([contents], fileName, { type: 'application/json' });
   }
 
   function exportName(name) {
@@ -703,7 +699,7 @@ export function initUI({ app, toast }) {
   async function shareExportFile(fileName, format, payload, title, text) {
     const file = exportFile(fileName, format, payload);
     if (!navigator.share || !navigator.canShare?.({ files: [file] })) {
-      downloadExportFile(fileName, format, payload);
+      toastMessage('System file sharing is unavailable in this browser. Use the download button instead.');
       return;
     }
     try {
@@ -712,7 +708,7 @@ export function initUI({ app, toast }) {
     } catch (error) {
       if (error.name === 'AbortError') return;
       console.error('Native file sharing failed', error);
-      downloadExportFile(fileName, format, payload);
+      toastMessage('System file sharing is unavailable in this browser. Use the download button instead.');
     }
   }
 

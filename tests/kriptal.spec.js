@@ -346,6 +346,22 @@ test('toast text remains dark and legible in both themes', async ({ page }) => {
   await expect(toast).toHaveCSS('background-color', 'rgb(244, 211, 107)');
 });
 
+test('share action reports unsupported system sharing instead of silently downloading', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__downloadCount = 0;
+    Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
+    Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined });
+    HTMLAnchorElement.prototype.click = function () {
+      if (this.hasAttribute('download')) window.__downloadCount += 1;
+    };
+  });
+  await createIdentity(page, 'share-test');
+  await page.getByRole('button', { name: 'Identity' }).click();
+  await page.getByRole('button', { name: 'Share public-key file' }).click();
+  await expect(page.locator('#toast')).toContainText('System file sharing is unavailable');
+  expect(await page.evaluate(() => window.__downloadCount)).toBe(0);
+});
+
 test('shares public-key files and decrypts an encrypted message file', async ({ browser }) => {
   const aliceContext = await browser.newContext();
   const bobContext = await browser.newContext();
@@ -357,7 +373,7 @@ test('shares public-key files and decrypts an encrypted message file', async ({ 
   await createIdentity(alice, 'alice');
   const aliceIdentityFile = await shareIdentityFile(alice);
   expect(aliceIdentityFile.name).toBe('alice.kriptalkey');
-  expect(aliceIdentityFile.type).toBe('application/vnd.kriptal.public-key+json');
+  expect(aliceIdentityFile.type).toBe('application/json');
 
   await createIdentity(bob, 'bob');
   const bobIdentityFile = await shareIdentityFile(bob);
@@ -379,7 +395,7 @@ test('shares public-key files and decrypts an encrypted message file', async ({ 
   await expect.poll(() => bob.evaluate(() => window.__sharedFiles.length)).toBeGreaterThan(0);
   const messageFile = await bob.evaluate(() => window.__sharedFiles.pop());
   expect(messageFile.name).toMatch(/^bob-\d{8}-\d{6}\.kriptalmsg$/);
-  expect(messageFile.type).toBe('application/vnd.kriptal.encrypted-message+json');
+  expect(messageFile.type).toBe('application/json');
 
   const incoming = await aliceContext.newPage();
   await enableNativeFileShare(incoming);

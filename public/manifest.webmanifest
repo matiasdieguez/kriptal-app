@@ -26,13 +26,15 @@
     {
       "action": "./",
       "accept": {
-        "application/vnd.kriptal.public-key+json": [".kriptalkey"]
+        "application/vnd.kriptal.public-key+json": [".kriptalkey"],
+        "application/json": [".kriptalkey"]
       }
     },
     {
       "action": "./",
       "accept": {
-        "application/vnd.kriptal.encrypted-message+json": [".kriptalmsg"]
+        "application/vnd.kriptal.encrypted-message+json": [".kriptalmsg"],
+        "application/json": [".kriptalmsg"]
       }
     }
   ]

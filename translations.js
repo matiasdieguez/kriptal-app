@@ -551,7 +551,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Elimina permanentemente de este dispositivo tu identidad local, contactos, ajustes, historial de mensajes y caché sin conexión.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': '¿Borrar todos los datos de Kriptal en este dispositivo? Tu identidad y tus contactos no se podrán recuperar.',
     'Could not wipe all app data': 'No se pudieron borrar todos los datos de la app',
-    'All Kriptal app data was wiped': 'Se borraron todos los datos de Kriptal'
+    'All Kriptal app data was wiped': 'Se borraron todos los datos de Kriptal',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'Este navegador no permite compartir archivos del sistema. Usa el botón de descarga.'
   },
   it: {
     Configuration: 'Configurazione',
@@ -566,7 +567,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Rimuove definitivamente da questo dispositivo identità locale, contatti, impostazioni, cronologia dei messaggi e cache offline.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Cancellare tutti i dati di Kriptal da questo dispositivo? Identità e contatti non potranno essere recuperati.',
     'Could not wipe all app data': 'Impossibile cancellare tutti i dati dell’app',
-    'All Kriptal app data was wiped': 'Tutti i dati di Kriptal sono stati cancellati'
+    'All Kriptal app data was wiped': 'Tutti i dati di Kriptal sono stati cancellati',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'Questo browser non supporta la condivisione file di sistema. Usa il pulsante di download.'
   },
   pt: {
     Configuration: 'Configuração',
@@ -581,7 +583,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Remova permanentemente deste dispositivo sua identidade local, contatos, configurações, histórico de mensagens e cache offline.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Apagar todos os dados do Kriptal neste dispositivo? Sua identidade e seus contatos não poderão ser recuperados.',
     'Could not wipe all app data': 'Não foi possível apagar todos os dados do app',
-    'All Kriptal app data was wiped': 'Todos os dados do Kriptal foram apagados'
+    'All Kriptal app data was wiped': 'Todos os dados do Kriptal foram apagados',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'Este navegador não permite compartilhar arquivos pelo sistema. Use o botão de download.'
   },
   nl: {
     Configuration: 'Configuratie',
@@ -596,7 +599,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Verwijder je lokale identiteit, contacten, instellingen, berichtgeschiedenis en offline cache definitief van dit apparaat.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Alle Kriptal-gegevens op dit apparaat wissen? Je identiteit en contacten kunnen niet worden hersteld.',
     'Could not wipe all app data': 'Alle appgegevens konden niet worden gewist',
-    'All Kriptal app data was wiped': 'Alle Kriptal-appgegevens zijn gewist'
+    'All Kriptal app data was wiped': 'Alle Kriptal-appgegevens zijn gewist',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'Bestanden delen via het systeem is niet beschikbaar. Gebruik de downloadknop.'
   },
   fr: {
     Configuration: 'Configuration',
@@ -611,7 +615,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Supprime définitivement de cet appareil votre identité locale, vos contacts, vos préférences, l’historique des messages et le cache hors ligne.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Effacer toutes les données Kriptal de cet appareil ? Votre identité et vos contacts ne pourront pas être récupérés.',
     'Could not wipe all app data': 'Impossible d’effacer toutes les données de l’application',
-    'All Kriptal app data was wiped': 'Toutes les données Kriptal ont été effacées'
+    'All Kriptal app data was wiped': 'Toutes les données Kriptal ont été effacées',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'Le partage de fichiers système est indisponible dans ce navigateur. Utilisez le bouton de téléchargement.'
   },
   zh: {
     Configuration: '配置',
@@ -626,7 +631,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': '永久删除此设备上的本地身份、联系人、设置、消息记录和离线应用缓存。',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': '清除此设备上的所有 Kriptal 应用数据？身份和联系人无法恢复。',
     'Could not wipe all app data': '无法清除所有应用数据',
-    'All Kriptal app data was wiped': '已清除所有 Kriptal 应用数据'
+    'All Kriptal app data was wiped': '已清除所有 Kriptal 应用数据',
+    'System file sharing is unavailable in this browser. Use the download button instead.': '此浏览器不支持系统文件分享，请使用下载按钮。'
   },
   ja: {
     Configuration: '設定',
@@ -641,7 +647,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'このデバイスから ID、連絡先、設定、メッセージ履歴、オフラインキャッシュを完全に削除します。',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'このデバイスの Kriptal データをすべて消去しますか？ID と連絡先は復元できません。',
     'Could not wipe all app data': 'アプリデータを消去できませんでした',
-    'All Kriptal app data was wiped': 'Kriptal のアプリデータをすべて消去しました'
+    'All Kriptal app data was wiped': 'Kriptal のアプリデータをすべて消去しました',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'このブラウザーではシステム共有を利用できません。ダウンロードボタンを使用してください。'
   },
   ru: {
     Configuration: 'Настройки',
@@ -656,7 +663,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Безвозвратно удалить с устройства локальный идентификатор, контакты, настройки, историю сообщений и автономный кеш.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Удалить все данные Kriptal на этом устройстве? Идентификатор и контакты нельзя будет восстановить.',
     'Could not wipe all app data': 'Не удалось удалить все данные приложения',
-    'All Kriptal app data was wiped': 'Все данные Kriptal удалены'
+    'All Kriptal app data was wiped': 'Все данные Kriptal удалены',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'В этом браузере недоступен системный обмен файлами. Используйте кнопку скачивания.'
   },
   eo: {
     Configuration: 'Agordo',
@@ -671,7 +679,8 @@ const configurationText = {
     'Permanently remove your local identity, contacts, settings, replay history, and offline app cache from this device.': 'Konstante forigi de ĉi tiu aparato vian lokan identecon, kontaktojn, agordojn, mesaĝhistorion kaj eksterretan kaŝmemoron.',
     'Wipe all Kriptal app data on this device? Your identity and contacts cannot be recovered.': 'Ĉu forviŝi ĉiujn datumojn de Kriptal en ĉi tiu aparato? Via identeco kaj kontaktoj ne estas reakireblaj.',
     'Could not wipe all app data': 'Ne eblis forviŝi ĉiujn datumojn de la aplikaĵo',
-    'All Kriptal app data was wiped': 'Ĉiuj datumoj de Kriptal estis forviŝitaj'
+    'All Kriptal app data was wiped': 'Ĉiuj datumoj de Kriptal estis forviŝitaj',
+    'System file sharing is unavailable in this browser. Use the download button instead.': 'Sistema kunhavigo de dosieroj ne disponeblas en ĉi tiu retumilo. Uzu la elŝutan butonon.'
   }
 };
 
