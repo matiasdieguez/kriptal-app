@@ -82,6 +82,15 @@ async function createIdentity(page, username) {
 async function enableNativeFileShare(page) {
   await page.addInitScript(() => {
     window.__sharedFiles = [];
+    window.__launchConsumer = null;
+    Object.defineProperty(window, 'launchQueue', {
+      configurable: true,
+      value: {
+        setConsumer: (consumer) => {
+          window.__launchConsumer = consumer;
+        }
+      }
+    });
     Object.defineProperty(navigator, 'canShare', {
       configurable: true,
       value: ({ files }) => Array.isArray(files) && files.length > 0
@@ -90,12 +99,33 @@ async function enableNativeFileShare(page) {
       configurable: true,
       value: async ({ files }) => {
         const shared = await Promise.all(
-          files.map(async (file) => ({ name: file.name, contents: await file.text() }))
+          files.map(async (file) => ({
+            name: file.name,
+            type: file.type,
+            contents: await file.text()
+          }))
         );
         window.__sharedFiles.push(...shared);
       }
     });
   });
+}
+
+async function launchFileToApp(page, file) {
+  await page.evaluate(async ({ name, contents }) => {
+    await window.__launchConsumer({
+      files: [
+        {
+          getFile: async () =>
+            new File([contents], name, {
+              type: name.endsWith('.kriptalkey')
+                ? 'application/vnd.kriptal.public-key+json'
+                : 'application/vnd.kriptal.encrypted-message+json'
+            })
+        }
+      ]
+    });
+  }, file);
 }
 
 async function shareIdentityFile(page) {
@@ -148,11 +178,14 @@ test('shares public-key files and decrypts an encrypted message file', async ({ 
 
   await createIdentity(alice, 'alice');
   const aliceIdentityFile = await shareIdentityFile(alice);
+  expect(aliceIdentityFile.name).toBe('alice.kriptalkey');
+  expect(aliceIdentityFile.type).toBe('application/vnd.kriptal.public-key+json');
 
   await createIdentity(bob, 'bob');
   const bobIdentityFile = await shareIdentityFile(bob);
 
-  await importContact(alice, bobIdentityFile);
+  expect(bobIdentityFile.name).toBe('bob.kriptalkey');
+  await launchFileToApp(alice, bobIdentityFile);
   await expect(alice.locator('.contact-row strong')).toHaveText('bob');
 
   await importContact(bob, aliceIdentityFile);
@@ -166,21 +199,16 @@ test('shares public-key files and decrypts an encrypted message file', async ({ 
   await bob.getByRole('button', { name: 'Share message file' }).click();
   await expect.poll(() => bob.evaluate(() => window.__sharedFiles.length)).toBeGreaterThan(0);
   const messageFile = await bob.evaluate(() => window.__sharedFiles.pop());
-  expect(messageFile.name).toBe('kriptal-message.json');
+  expect(messageFile.name).toMatch(/^bob-\d{8}-\d{6}\.kriptalmsg$/);
+  expect(messageFile.type).toBe('application/vnd.kriptal.encrypted-message+json');
 
   const incoming = await aliceContext.newPage();
+  await enableNativeFileShare(incoming);
   await incoming.goto('/');
   await expect(incoming.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await incoming.getByLabel('Vault password').fill(password);
   await incoming.getByRole('button', { name: 'Unlock Kriptal' }).click();
-  await incoming.getByRole('button', { name: 'Open message' }).click();
-  await expect(incoming.getByRole('heading', { name: 'Decrypt a message file' })).toBeVisible();
-  await incoming.getByLabel('Encrypted message file').setInputFiles({
-    name: messageFile.name,
-    mimeType: 'application/json',
-    buffer: Buffer.from(messageFile.contents)
-  });
-  await incoming.getByRole('button', { name: 'Decrypt', exact: true }).click();
+  await launchFileToApp(incoming, messageFile);
   await expect(incoming.getByText('Verified from bob')).toBeVisible();
   await expect(incoming.getByText('A message only Alice can read.')).toBeVisible();
 

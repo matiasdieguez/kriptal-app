@@ -4,6 +4,8 @@ Kriptal is an offline-first, vanilla JavaScript PWA for exchanging encrypted mes
 
 Identity exports contain public keys only. Encrypted-message exports contain the signed, encrypted message payload. Recipients import identity files from Contacts and open message files from Open message. Previously shared identity and message links are still supported.
 
+Identity exports are named `{username}.kriptalkey`; encrypted messages use `{sender}-{YYYYMMDD-HHMMSS}.kriptalmsg`. On browsers and operating systems that support PWA file handling, install Kriptal and choose it from the OS “Open with” or share options for these file types. Opening a file this way takes the user to the app; after unlocking the local vault, Kriptal imports the identity or verifies and decrypts the message.
+
 ## Run locally
 
 ```bash

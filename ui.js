@@ -39,11 +39,20 @@ export function initUI({ app, toast }) {
   let routeMessage = readRoute('m');
   let routeKey = readRoute('k');
   let pendingLinkOpened = false;
+  const pendingLaunchFiles = [];
+  let processingLaunchFiles = false;
 
   function toastMessage(message) {
     toast.textContent = message;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  if (window.launchQueue?.setConsumer) {
+    window.launchQueue.setConsumer((launchParams) => {
+      pendingLaunchFiles.push(...launchParams.files);
+      processLaunchFiles();
+    });
   }
 
   function renderSetup() {
@@ -126,6 +135,7 @@ export function initUI({ app, toast }) {
     if (view === 'identity') renderIdentity();
     if (view === 'import') renderImportContact();
     openPendingLink();
+    processLaunchFiles();
   }
 
   function openPendingLink() {
@@ -166,7 +176,7 @@ export function initUI({ app, toast }) {
 
   function renderOpenMessage() {
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Open a private message</div><h2>Decrypt a message file</h2></div><div class="section-label">Verify before opening</div></div><p class="lede">Choose the encrypted Kriptal message file you received. The sender's identity and signature will be verified before the message is shown.</p><form id="message-file-form"><label for="message-file">Encrypted message file</label><input id="message-file" name="message-file" type="file" accept=".json,application/json" required><div class="actions"><button type="submit">Decrypt</button></div></form></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Open a private message</div><h2>Decrypt a message file</h2></div><div class="section-label">Verify before opening</div></div><p class="lede">Choose the encrypted Kriptal message file you received. The sender's identity and signature will be verified before the message is shown.</p><form id="message-file-form"><label for="message-file">Encrypted message file</label><input id="message-file" name="message-file" type="file" accept=".kriptalmsg,application/vnd.kriptal.encrypted-message+json,.json,application/json" required><div class="actions"><button type="submit">Decrypt</button></div></form></section>`;
     document
       .querySelector('#message-file-form')
       .addEventListener('submit', decryptMessageFile);
@@ -178,6 +188,41 @@ export function initUI({ app, toast }) {
     if (value?.format !== format || value.version !== 1)
       throw new Error('The selected file is not a supported Kriptal export');
     return value.payload;
+  }
+
+  async function openExportFile(file) {
+    if (file.size > 200000) throw new Error('The selected file is too large');
+    const value = JSON.parse(await file.text());
+    if (value?.format === 'kriptal-public-identity') {
+      await importContact(value.payload);
+      return;
+    }
+    if (value?.format === 'kriptal-encrypted-message') {
+      if (!validMessage(value.payload))
+        throw new Error('This encrypted message file is expired or malformed');
+      routeMessage = value.payload;
+      await showDecrypt();
+      return;
+    }
+    throw new Error('The selected file is not a supported Kriptal export');
+  }
+
+  async function processLaunchFiles() {
+    if (!session || processingLaunchFiles || !pendingLaunchFiles.length) return;
+    processingLaunchFiles = true;
+    try {
+      while (pendingLaunchFiles.length) {
+        const handle = pendingLaunchFiles.shift();
+        try {
+          await openExportFile(await handle.getFile());
+        } catch (error) {
+          console.error('Could not open the Kriptal file launched by the operating system', error);
+          toastMessage('Could not open that Kriptal file');
+        }
+      }
+    } finally {
+      processingLaunchFiles = false;
+    }
   }
 
   async function decryptMessageFile(event) {
@@ -246,7 +291,7 @@ export function initUI({ app, toast }) {
     showFileShare(
       'Encrypted message file ready',
       'The message is encrypted and signed. Share this file with your recipient.',
-      'kriptal-message.json',
+      `${exportName(session.username)}-${fileDateTime()}.kriptalmsg`,
       'kriptal-encrypted-message',
       payload
     );
@@ -278,7 +323,7 @@ export function initUI({ app, toast }) {
       `<section class="panel"><div class="panel-head"><div><div class="section-label">Your public identity</div><h2>Let someone add you</h2></div><div class="section-label">Public-key file</div></div><div class="identity-share"><p class="lede">Share this public-key file so a contact can add you and encrypt messages for you. It contains no private information.</p><div class="actions"><button id="share-key">Share public-key file</button><button class="secondary" id="download-key">Download public-key file</button></div></div></section>`;
     document.querySelector('#share-key').addEventListener('click', () =>
       shareExportFile(
-        'kriptal-public-key.json',
+        `${exportName(session.username)}.kriptalkey`,
         'kriptal-public-identity',
         identity,
         'Kriptal public identity',
@@ -286,7 +331,7 @@ export function initUI({ app, toast }) {
       )
     );
     document.querySelector('#download-key').addEventListener('click', () =>
-      downloadExportFile('kriptal-public-key.json', 'kriptal-public-identity', identity)
+      downloadExportFile(`${exportName(session.username)}.kriptalkey`, 'kriptal-public-identity', identity)
     );
   }
 
@@ -298,7 +343,7 @@ export function initUI({ app, toast }) {
 
   function renderImportContact() {
     document.querySelector('#workspace').innerHTML =
-      `<section class="panel"><div class="panel-head"><div><div class="section-label">Add to your circle</div><h2>Import a public identity</h2></div><div class="section-label">Public-key file</div></div><p class="lede">Choose the public-key file your contact shared with you. It contains only public information.</p><form id="contact-import-form"><label for="contact-file">Public-key file</label><input id="contact-file" name="contact-file" type="file" accept=".json,application/json" required><div class="actions"><button type="submit">Import contact</button><button type="button" class="secondary" id="cancel-contact-import">Cancel</button></div></form></section>`;
+      `<section class="panel"><div class="panel-head"><div><div class="section-label">Add to your circle</div><h2>Import a public identity</h2></div><div class="section-label">Public-key file</div></div><p class="lede">Choose the public-key file your contact shared with you. It contains only public information.</p><form id="contact-import-form"><label for="contact-file">Public-key file</label><input id="contact-file" name="contact-file" type="file" accept=".kriptalkey,application/vnd.kriptal.public-key+json,.json,application/json" required><div class="actions"><button type="submit">Import contact</button><button type="button" class="secondary" id="cancel-contact-import">Cancel</button></div></form></section>`;
     document
       .querySelector('#contact-import-form')
       .addEventListener('submit', importContactFile);
@@ -446,7 +491,26 @@ export function initUI({ app, toast }) {
 
   function exportFile(fileName, format, payload) {
     const contents = JSON.stringify({ format, version: 1, payload }, null, 2);
-    return new File([contents], fileName, { type: 'application/json' });
+    const type =
+      format === 'kriptal-public-identity'
+        ? 'application/vnd.kriptal.public-key+json'
+        : 'application/vnd.kriptal.encrypted-message+json';
+    return new File([contents], fileName, { type });
+  }
+
+  function exportName(name) {
+    const safeName = name
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48);
+    return safeName || 'contact';
+  }
+
+  function fileDateTime(date = new Date()) {
+    const twoDigits = (value) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}${twoDigits(date.getMonth() + 1)}${twoDigits(date.getDate())}-${twoDigits(date.getHours())}${twoDigits(date.getMinutes())}${twoDigits(date.getSeconds())}`;
   }
 
   function downloadExportFile(fileName, format, payload) {

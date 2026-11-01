@@ -1,10 +1,25 @@
 {
   "name": "Kriptal",
   "short_name": "Kriptal",
-  "description": "Private messages carried by links.",
-  "start_url": "../",
+  "description": "Private encrypted messages and identities.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f5f1e8",
   "theme_color": "#f5f1e8",
-  "icons": [{ "src": "../icon.png", "sizes": "192x192", "type": "image/png" }]
+  "icons": [{ "src": "./icon.png", "sizes": "192x192", "type": "image/png" }],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "application/vnd.kriptal.public-key+json": [".kriptalkey"]
+      }
+    },
+    {
+      "action": "./",
+      "accept": {
+        "application/vnd.kriptal.encrypted-message+json": [".kriptalmsg"]
+      }
+    }
+  ]
 }
