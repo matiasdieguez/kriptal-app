@@ -174,7 +174,11 @@ test('language selector translates the home page and information pages in all su
   await page.goto('/');
   for (const [language, linkName] of Object.entries(expected)) {
     await page.locator('#language-select').selectOption(language);
-    await expect(page.locator('.landing-nav-link')).toHaveText(expectedLandingLink[language]);
+    const landingLink = page.locator('.landing-nav-link');
+    await expect(landingLink).toHaveAttribute('aria-label', expectedLandingLink[language]);
+    await expect(landingLink).toHaveAttribute('href', './landing.html');
+    await expect(landingLink).toHaveText('');
+    await expect(landingLink.locator('svg')).toBeVisible();
     await expect(page.locator('.setup-intro .eyebrow')).toHaveText(expectedTagline[language]);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(expectedHeadline[language]);
     await expect(page.locator('html')).toHaveAttribute(

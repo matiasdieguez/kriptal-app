@@ -54,7 +54,12 @@
   <header class="topbar">
     <a class="brand" href="#" aria-label="Kriptal home"><img src="./kriptal.png" alt="Kriptal"><span>KRIPTAL</span></a>
     <div class="topbar-tools">
-      <a class="landing-nav-link" href="./landing.html">Learn about Kriptal</a>
+      <a class="landing-nav-link" href="./landing.html" aria-label="Learn about Kriptal" title="Learn about Kriptal">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 11v5m0-8h.01"></path>
+        </svg>
+      </a>
       <label class="sr-only" for="language-select">Language</label>
       <select id="language-select" aria-label="Language">
         <option value="en">English</option>
