@@ -132,9 +132,35 @@ test('language selector translates the home page and information pages in all su
     ru: 'Как работает Kriptal',
     eo: 'Kiel Kriptal funkcias'
   };
+  const expectedHeadline = {
+    en: 'Your messages, secured',
+    es: 'Tus mensajes, protegidos',
+    it: 'I tuoi messaggi, al sicuro',
+    pt: 'Suas mensagens, protegidas',
+    nl: 'Je berichten, beveiligd',
+    fr: 'Vos messages, sécurisés',
+    zh: '你的消息，安全无忧',
+    ja: 'あなたのメッセージを、安全に',
+    ru: 'Ваши сообщения под защитой',
+    eo: 'Viaj mesaĝoj, sekurigitaj'
+  };
+  const expectedTagline = {
+    en: 'Privacy is a Human Right',
+    es: 'La privacidad es un derecho humano',
+    it: 'La privacy è un diritto umano',
+    pt: 'A privacidade é um direito humano',
+    nl: 'Privacy is een mensenrecht',
+    fr: 'La vie privée est un droit humain',
+    zh: '隐私是一项人权',
+    ja: 'プライバシーは人権です',
+    ru: 'Конфиденциальность — это право человека',
+    eo: 'Privateco estas homa rajto'
+  };
   await page.goto('/');
   for (const [language, linkName] of Object.entries(expected)) {
     await page.locator('#language-select').selectOption(language);
+    await expect(page.locator('.setup-intro .eyebrow')).toHaveText(expectedTagline[language]);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(expectedHeadline[language]);
     await expect(page.locator('html')).toHaveAttribute(
       'lang',
       language === 'zh' ? 'zh-CN' : language
@@ -304,6 +330,20 @@ test('defaults to dark theme and configures theme, logout, and app-data wipe', a
   expect(await page.evaluate(() => Object.keys(localStorage).filter((key) => key.startsWith('kriptal')))).toEqual([]);
   expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
   expect(await page.evaluate(async () => (await caches.keys()).filter((name) => name.startsWith('kriptal-')))).toEqual([]);
+});
+
+test('toast text remains dark and legible in both themes', async ({ page }) => {
+  await page.goto('/');
+  const toast = page.locator('#toast');
+  await expect(toast).toHaveCSS('color', 'rgb(28, 39, 36)');
+  await expect(toast).toHaveCSS('background-color', 'rgb(228, 201, 107)');
+
+  await page.evaluate(() => {
+    localStorage.setItem('kriptal-theme', 'light');
+  });
+  await page.reload();
+  await expect(toast).toHaveCSS('color', 'rgb(28, 39, 36)');
+  await expect(toast).toHaveCSS('background-color', 'rgb(244, 211, 107)');
 });
 
 test('shares public-key files and decrypts an encrypted message file', async ({ browser }) => {

@@ -679,6 +679,38 @@ for (const [language, strings] of Object.entries(configurationText)) {
   Object.assign(ptExtra[language], strings);
 }
 
+const homePageText = {
+  es: 'Tus mensajes, protegidos',
+  it: 'I tuoi messaggi, al sicuro',
+  pt: 'Suas mensagens, protegidas',
+  nl: 'Je berichten, beveiligd',
+  fr: 'Vos messages, sécurisés',
+  zh: '你的消息，安全无忧',
+  ja: 'あなたのメッセージを、安全に',
+  ru: 'Ваши сообщения под защитой',
+  eo: 'Viaj mesaĝoj, sekurigitaj'
+};
+
+const privacyTagline = {
+  es: 'La privacidad es un derecho humano',
+  it: 'La privacy è un diritto umano',
+  pt: 'A privacidade é um direito humano',
+  nl: 'Privacy is een mensenrecht',
+  fr: 'La vie privée est un droit humain',
+  zh: '隐私是一项人权',
+  ja: 'プライバシーは人権です',
+  ru: 'Конфиденциальность — это право человека',
+  eo: 'Privateco estas homa rajto'
+};
+
+for (const [language, headline] of Object.entries(homePageText)) {
+  ptExtra[language]['Your messages, secured'] = headline;
+}
+
+for (const [language, tagline] of Object.entries(privacyTagline)) {
+  ptExtra[language]['Privacy is a Human Right'] = tagline;
+}
+
 export function translateText(value, language) {
   if (!language || language === 'en') return value;
   const dict = ptExtra[language] || {};

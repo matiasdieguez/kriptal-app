@@ -579,8 +579,8 @@ button.danger {
   bottom: 22px;
   left: 50%;
   transform: translate(-50%, 20px);
-  background: var(--ink);
-  color: white;
+  background: var(--yellow);
+  color: #1c2724;
   padding: 12px 18px;
   opacity: 0;
   pointer-events: none;
