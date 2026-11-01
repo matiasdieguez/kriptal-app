@@ -110,8 +110,6 @@ test('exchanges identities and decrypts an encrypted message link', async ({ bro
   await expect(incoming.getByRole('heading', { name: 'Unlock your vault' })).toBeVisible();
   await incoming.getByLabel('Vault password').fill(password);
   await incoming.getByRole('button', { name: 'Unlock Kriptal' }).click();
-  await expect(incoming.getByText('Encrypted link detected.')).toBeVisible();
-  await incoming.getByRole('button', { name: 'Verify & decrypt incoming link' }).click();
   await expect(incoming.getByText('Verified from bob')).toBeVisible();
   await expect(incoming.getByText('A message only Alice can read.')).toBeVisible();
 

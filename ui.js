@@ -41,6 +41,7 @@ export function initUI({ app, toast }) {
   let view = 'compose';
   let routeMessage = readRoute('m');
   let routeKey = readRoute('k');
+  let pendingLinkOpened = false;
 
   function toastMessage(message) {
     toast.textContent = message;
@@ -126,7 +127,21 @@ export function initUI({ app, toast }) {
     if (view === 'contacts') renderContacts();
     if (view === 'identity') renderIdentity();
     if (view === 'import') renderImportContact();
-    if (routeKey) importContact(routeKey);
+    openPendingLink();
+  }
+
+  function openPendingLink() {
+    if (pendingLinkOpened) return;
+    pendingLinkOpened = true;
+    const operation = routeMessage
+      ? showDecrypt()
+      : routeKey
+        ? importContact(routeKey)
+        : null;
+    operation?.catch((error) => {
+      console.error('Could not open the shared Kriptal link', error);
+      toastMessage('Could not open this shared link');
+    });
   }
 
   function renderCompose() {
@@ -312,10 +327,11 @@ export function initUI({ app, toast }) {
     session.contacts.push(contact);
     await saveSession();
     routeKey = null;
-    history.replaceState(null, '', location.pathname);
+    if (!routeMessage) history.replaceState(null, '', location.pathname + location.search);
     view = 'contacts';
     renderApp();
     toastMessage(`${payload.username} added · ${contact.fingerprint}`);
+    if (routeMessage) await showDecrypt();
   }
 
   async function showDecrypt() {
@@ -347,12 +363,16 @@ export function initUI({ app, toast }) {
         bytes(routeMessage.salt)
       );
       const content = fromJson(new Uint8Array(await decryptBytes(routeMessage, key)));
+      const messageFrom = routeMessage.from;
       markReplayed(routeMessage.id);
+      routeMessage = null;
+      history.replaceState(null, '', location.pathname + location.search);
+      renderApp();
       let fileButton = '';
       if (content.file)
         fileButton = `<button id="download-file" class="secondary">Download ${escapeHtml(content.file.name)}</button>`;
       showModal(
-        `<div class="section-label">Verified from ${escapeHtml(routeMessage.from)}</div><h2>${escapeHtml(content.subject || 'Private message')}</h2><p class="lede">${escapeHtml(content.message).replaceAll('\n', '<br>')}</p><div class="notice">Sender fingerprint: ${escapeHtml(contact.fingerprint)}</div><div class="actions">${fileButton}<button class="secondary" id="close-modal">Close</button></div>`
+        `<div class="section-label">Verified from ${escapeHtml(messageFrom)}</div><h2>${escapeHtml(content.subject || 'Private message')}</h2><p class="lede">${escapeHtml(content.message).replaceAll('\n', '<br>')}</p><div class="notice">Sender fingerprint: ${escapeHtml(contact.fingerprint)}</div><div class="actions">${fileButton}<button class="secondary" id="close-modal">Close</button></div>`
       );
       document.querySelector('#download-file')?.addEventListener('click', () => {
         const blob = new Blob([bytes(content.file.data)], {
