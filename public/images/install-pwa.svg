@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 250" role="img" aria-labelledby="title description">
+  <title id="title">Install Kriptal as a progressive web app</title>
+  <desc id="description">Open the browser menu, choose Install app or Add to Home Screen, and launch Kriptal from your device.</desc>
+  <rect width="620" height="250" rx="18" fill="#1b2420"/>
+  <g stroke="#8ac99f" stroke-width="3">
+    <rect x="48" y="42" width="144" height="148" rx="12" fill="#202a24"/>
+    <rect x="238" y="42" width="144" height="148" rx="12" fill="#202a24"/>
+    <rect x="428" y="42" width="144" height="148" rx="12" fill="#202a24"/>
+  </g>
+  <g fill="none" stroke="#e4c96b" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+    <path d="M165 70h1m0 22h1m0 22h1"/>
+    <path d="M295 117V72m-17 17 17-17 17 17m-42 35h50"/>
+    <rect x="475" y="70" width="50" height="50" rx="11"/>
+    <path d="M487 95h26m-13-13v26"/>
+  </g>
+  <g fill="#e8eee9" font-family="Arial,sans-serif" text-anchor="middle">
+    <text x="120" y="157" font-size="14" font-weight="700">BROWSER MENU</text>
+    <text x="310" y="157" font-size="14" font-weight="700">INSTALL APP</text>
+    <text x="500" y="157" font-size="14" font-weight="700">OPEN KRIPTAL</text>
+  </g>
+  <g fill="#a1afa5" font-family="Arial,sans-serif" font-size="14" font-weight="700" text-anchor="middle">
+    <text x="120" y="220">1</text><text x="310" y="220">2</text><text x="500" y="220">3</text>
+  </g>
+  <g fill="none" stroke="#8ac99f" stroke-width="3">
+    <path d="M202 116h25m-8-8 8 8-8 8M392 116h25m-8-8 8 8-8 8"/>
+  </g>
+</svg>

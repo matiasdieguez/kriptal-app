@@ -712,12 +712,28 @@ const privacyTagline = {
   eo: 'Privateco estas homa rajto'
 };
 
+const landingLinkText = {
+  es: 'Conoce Kriptal',
+  it: 'Scopri Kriptal',
+  pt: 'Conheça o Kriptal',
+  nl: 'Meer over Kriptal',
+  fr: 'Découvrir Kriptal',
+  zh: '了解 Kriptal',
+  ja: 'Kriptal について',
+  ru: 'Узнайте о Kriptal',
+  eo: 'Pri Kriptal'
+};
+
 for (const [language, headline] of Object.entries(homePageText)) {
   ptExtra[language]['Your messages, secured'] = headline;
 }
 
 for (const [language, tagline] of Object.entries(privacyTagline)) {
   ptExtra[language]['Privacy is a Human Right'] = tagline;
+}
+
+for (const [language, label] of Object.entries(landingLinkText)) {
+  ptExtra[language]['Learn about Kriptal'] = label;
 }
 
 export function translateText(value, language) {

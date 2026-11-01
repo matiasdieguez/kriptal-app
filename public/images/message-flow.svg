@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" role="img" aria-labelledby="title description">
+  <title id="title">Encrypted file exchange</title>
+  <desc id="description">A sender encrypts a message on their device. Only an encrypted file is shared directly with the recipient, who verifies the sender and decrypts it on their device.</desc>
+  <rect width="760" height="300" rx="18" fill="#1b2420"/>
+  <g fill="none" stroke="#8ac99f" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+    <rect x="62" y="58" width="118" height="164" rx="12"/>
+    <path d="M92 88h58M92 108h40M108 194h26"/>
+    <rect x="320" y="78" width="102" height="132" rx="8" stroke="#e4c96b"/>
+    <path d="m350 112 20 18 24-29m-44 66h42m-42 17h30" stroke="#e4c96b"/>
+    <rect x="580" y="58" width="118" height="164" rx="12"/>
+    <path d="M610 88h58M610 108h40M626 194h26"/>
+    <path d="M190 140h106m-14-14 14 14-14 14M446 140h106m-14-14 14 14-14 14"/>
+    <path d="M355 70v-7a16 16 0 0 1 32 0v7m-37 0h42v34h-42z" stroke="#ef826c"/>
+  </g>
+  <g fill="#e8eee9" font-family="Arial,sans-serif" text-anchor="middle">
+    <text x="121" y="255" font-size="17" font-weight="700">YOUR DEVICE</text>
+    <text x="371" y="255" font-size="17" font-weight="700">ENCRYPTED FILE</text>
+    <text x="639" y="255" font-size="17" font-weight="700">THEIR DEVICE</text>
+  </g>
+  <text x="371" y="48" fill="#a1afa5" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">NO SERVER INBOX OR MESSAGE RELAY</text>
+</svg>

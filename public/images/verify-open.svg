@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 240" role="img" aria-labelledby="title description">
+  <title id="title">Verify and decrypt a received message</title>
+  <desc id="description">Check the sender fingerprint, verify the signature, and decrypt the message on your device.</desc>
+  <rect width="620" height="240" rx="18" fill="#1b2420"/>
+  <g fill="#202a24" stroke="#8ac99f" stroke-width="3">
+    <rect x="40" y="58" width="160" height="112" rx="12"/>
+    <rect x="230" y="58" width="160" height="112" rx="12"/>
+    <rect x="420" y="58" width="160" height="112" rx="12"/>
+  </g>
+  <g fill="none" stroke="#e4c96b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m87 111 15 15 29-34m-45-13h72m-72 57h56"/>
+    <path d="M287 91V80a16 16 0 0 1 32 0v11m-38 0h44v42h-44z"/>
+    <path d="M463 87h70m-70 18h70m-70 18h48"/>
+    <path d="M205 114h17m-10-10 10 10-10 10m177-10h17m-10-10 10 10-10 10"/>
+  </g>
+  <g fill="#e8eee9" font-family="Arial,sans-serif" text-anchor="middle">
+    <text x="120" y="198" font-size="14" font-weight="700">VERIFY SENDER</text>
+    <text x="310" y="198" font-size="14" font-weight="700">DECRYPT LOCALLY</text>
+    <text x="500" y="198" font-size="14" font-weight="700">READ MESSAGE</text>
+  </g>
+</svg>

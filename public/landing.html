@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#121815">
+  <meta name="description" content="Meet Kriptal: private, local-first encrypted messaging. Learn how encryption, identity verification, and careful device practices help protect your conversations.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://matiasdieguez.github.io/kriptal-app/landing.html">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; manifest-src 'self' data:; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'self' blob:;">
+  <script src="./theme.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="icon" href="./icon.png">
+  <title>Privacy is a Human Right | Kriptal</title>
+</head>
+<body>
+  <div class="grain"></div>
+  <header class="topbar landing-header">
+    <a class="brand" href="./landing.html" aria-label="Kriptal landing page"><img src="./kriptal.png" alt=""><span>KRIPTAL</span></a>
+    <nav aria-label="Landing page navigation">
+      <a href="#security">Security</a>
+      <a href="#install">Install</a>
+      <a href="#getting-started">How to use</a>
+    </nav>
+    <a class="landing-cta" href="./">Open Kriptal <span aria-hidden="true">→</span></a>
+  </header>
+
+  <main class="landing-shell">
+    <section class="landing-hero">
+      <div class="landing-hero-copy">
+        <div class="eyebrow">Privacy is a Human Right</div>
+        <h1>Your messages,<br><em>secured.</em></h1>
+        <p class="landing-lede">Kriptal is a private, local-first way to encrypt messages for the people you trust. Your device creates the keys, encrypts the message, and gives you a file to share directly.</p>
+        <div class="landing-actions">
+          <a class="landing-cta" href="./">Open Kriptal <span aria-hidden="true">→</span></a>
+          <a class="landing-text-link" href="#getting-started">See how it works <span aria-hidden="true">↓</span></a>
+        </div>
+        <p class="landing-note">No Kriptal account, server inbox, or message relay. You choose how to share each file.</p>
+      </div>
+      <figure class="landing-hero-art">
+        <img src="./images/message-flow.svg" alt="A message is encrypted on your device, shared as a file, then verified and decrypted on the recipient’s device.">
+        <figcaption>Your device → encrypted file → their device</figcaption>
+      </figure>
+    </section>
+
+    <section class="landing-section privacy-statement" aria-labelledby="privacy-title">
+      <div class="section-label">A principle, not a feature</div>
+      <h2 id="privacy-title">Privacy is a human right.</h2>
+      <p>Private communication gives people room to think, learn, organize, and be themselves. Article 12 of the <a href="https://www.un.org/en/about-us/universal-declaration-of-human-rights" target="_blank" rel="noopener noreferrer">Universal Declaration of Human Rights</a> recognizes the right to privacy in correspondence. Kriptal is one small tool for making private communication more accessible—not a substitute for a broader, safer digital world.</p>
+    </section>
+
+    <section class="landing-section" id="security" aria-labelledby="security-title">
+      <div class="section-label">Security by design</div>
+      <h2 id="security-title">Your keys stay yours.</h2>
+      <p class="landing-section-intro">Kriptal is designed so message content is encrypted on your device before you share it. There is no Kriptal message server to deliver or store your conversations.</p>
+      <div class="security-grid">
+        <article class="security-card">
+          <span class="security-index">01 / LOCAL VAULT</span>
+          <h3>Private keys stay on your device</h3>
+          <p>Your identity and contacts are stored in a password-encrypted local vault. Your vault password is not sent to Kriptal, and there is no password reset.</p>
+        </article>
+        <article class="security-card">
+          <span class="security-index">02 / END-TO-END</span>
+          <h3>Encrypt for your recipient</h3>
+          <p>Messages use hybrid P-256 and ML-KEM-768 key agreement to derive an AES-256-GCM encryption key. The recipient decrypts the message on their device.</p>
+        </article>
+        <article class="security-card">
+          <span class="security-index">03 / AUTHENTICITY</span>
+          <h3>Verify who sent it</h3>
+          <p>Messages are signed with ML-DSA-65. Kriptal checks the signature and the sender’s saved identity before revealing the message.</p>
+        </article>
+        <article class="security-card">
+          <span class="security-index">04 / NO DELIVERY SERVER</span>
+          <h3>You carry the message</h3>
+          <p>Kriptal creates an encrypted file; it does not transmit it for you. You decide whether to use your device’s share sheet, another channel, or a download.</p>
+        </article>
+      </div>
+      <aside class="landing-caveat">
+        <strong>Know the limits.</strong>
+        <span>Encryption cannot protect a compromised or unlocked device, prevent a recipient from copying a message, or hide ordinary network metadata from the websites and services you use to share files. Kriptal has not been independently audited; cryptographic algorithms alone do not guarantee that an app is secure.</span>
+      </aside>
+      <div class="source-panel">
+        <div>
+          <div class="section-label">Open source, open to inspection</div>
+          <h3>Review the code. Build it yourself.</h3>
+          <p>The source, dependency manifests, and build workflow are public. You can inspect how keys and messages are handled and build the static app locally. Public source makes verification possible; it does not by itself prove that a hosted copy matches the source or that the app is vulnerability-free.</p>
+        </div>
+        <a class="landing-outline-link" href="https://github.com/matiasdieguez/kriptal-app" target="_blank" rel="noopener noreferrer">View source on GitHub ↗</a>
+      </div>
+    </section>
+
+    <section class="landing-section practice-section" aria-labelledby="practice-title">
+      <div class="section-label">Protect the whole conversation</div>
+      <h2 id="practice-title">Good security is a shared habit.</h2>
+      <div class="practice-list">
+        <article><span>01</span><div><h3>Verify fingerprints in person or through a trusted channel</h3><p>Compare your contact’s fingerprint somewhere other than the channel you’re using to share the key. A matching username is not proof of identity.</p></div></article>
+        <article><span>02</span><div><h3>Use a strong, unique vault password</h3><p>Choose a password you do not reuse. Kriptal cannot reset it; losing it or erasing browser storage can make your identity unrecoverable.</p></div></article>
+        <article><span>03</span><div><h3>Lock and update your device</h3><p>Use your device’s screen lock, install browser and operating-system updates, and avoid using your vault on a device you do not control.</p></div></article>
+        <article><span>04</span><div><h3>Check before sharing—and plan for file copies</h3><p>Confirm the recipient and sharing destination. A recipient can save, forward, or screenshot a message after decrypting it.</p></div></article>
+      </div>
+      <p class="landing-footnote">For higher-risk situations, assess your threat model and seek tools with independent security audits and appropriate protections.</p>
+    </section>
+
+    <section class="landing-section install-section" id="install" aria-labelledby="install-title">
+      <div class="section-label">Install on your device</div>
+      <h2 id="install-title">Make Kriptal an app.</h2>
+      <p class="landing-section-intro">Kriptal is a progressive web app (PWA). Open it over HTTPS in a supported browser, then use that browser’s install option. Menu wording and availability vary by browser and device.</p>
+      <figure class="landing-diagram">
+        <img src="./images/install-pwa.svg" alt="Three steps: open the browser menu, choose Install app or Add to Home Screen, then launch Kriptal.">
+        <figcaption>Browser menu → Install app → Open Kriptal</figcaption>
+      </figure>
+      <div class="install-grid">
+        <article class="install-card"><h3>Android · Chrome</h3><ol><li>Open this site in Chrome.</li><li>Tap the browser menu (⋮).</li><li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm.</li></ol></article>
+        <article class="install-card"><h3>iPhone or iPad · Safari</h3><ol><li>Open this site in Safari.</li><li>Tap the Share button.</li><li>Choose <strong>Add to Home Screen</strong>, then tap <strong>Add</strong>.</li></ol></article>
+        <article class="install-card"><h3>Desktop · Chrome or Edge</h3><ol><li>Open this site in your browser.</li><li>Select the install icon in the address bar, or open the browser menu.</li><li>Choose <strong>Install Kriptal</strong> or <strong>Install this site as an app</strong>.</li></ol></article>
+      </div>
+      <p class="landing-footnote">Other browsers may offer different options or may not support PWA installation. Kriptal can also be used in a browser without installing it. The app shell can work offline after it has loaded, but sharing and receiving files still depends on your device and the method you choose.</p>
+    </section>
+
+    <section class="landing-section getting-started" id="getting-started" aria-labelledby="getting-started-title">
+      <div class="section-label">A private exchange, step by step</div>
+      <h2 id="getting-started-title">From first setup to a verified message.</h2>
+      <div class="use-step">
+        <div class="use-step-copy"><span class="step-number">STEP 01</span><h3>Create your vault and exchange identities</h3><ol><li>Open Kriptal and create a local identity with a strong password.</li><li>In <strong>Identity</strong>, share your public-key file with your contact.</li><li>In <strong>Contacts</strong>, import their public-key file.</li><li>Compare fingerprints with each other through a trusted, separate channel.</li></ol></div>
+        <figure><img src="./images/exchange-keys.svg" alt="You and your contact exchange public identity files in both directions and compare fingerprints."><figcaption>Exchange public keys; verify fingerprints independently.</figcaption></figure>
+      </div>
+      <div class="use-step use-step-reverse">
+        <div class="use-step-copy"><span class="step-number">STEP 02</span><h3>Write, encrypt, and share</h3><ol><li>Choose <strong>Compose</strong> and select the verified contact.</li><li>Write your message; optionally attach a file up to 50 KB.</li><li>Select <strong>Encrypt &amp; create file</strong>.</li><li>Use <strong>Share message file</strong> to open your device’s share sheet where supported, or choose <strong>Download file</strong>.</li></ol><p>Message text and attachments are encrypted before they enter the exported file.</p></div>
+        <figure><img src="./images/encrypt-share.svg" alt="Write a message, encrypt and sign it on your device, then share the encrypted file."><figcaption>Your device creates the encrypted message file.</figcaption></figure>
+      </div>
+      <div class="use-step">
+        <div class="use-step-copy"><span class="step-number">STEP 03</span><h3>Verify and open the message</h3><ol><li>Your contact opens Kriptal and chooses <strong>Open message</strong>, or opens the message file with the installed app where supported.</li><li>Kriptal checks the message signature against the saved public identity.</li><li>After verification, the recipient decrypts and reads the message locally.</li></ol><p>Message files expire after seven days. Successfully opened messages are marked as used on that device.</p></div>
+        <figure><img src="./images/verify-open.svg" alt="Verify the sender, decrypt the message locally, and then read it."><figcaption>Verify first. Then decrypt on the recipient’s device.</figcaption></figure>
+      </div>
+      <div class="landing-callout"><strong>There is no delivery inbox.</strong> Kriptal does not send files to your contact. Share or transfer the exported file yourself, and use a trusted channel to confirm your contact’s identity.</div>
+    </section>
+
+    <section class="landing-section explore-section" aria-labelledby="explore-title">
+      <div class="section-label">Explore the privacy ecosystem</div>
+      <h2 id="explore-title">Privacy is stronger together.</h2>
+      <p class="landing-section-intro">Different tools protect against different risks. Learn about them, choose what fits your needs, and verify software from its official source.</p>
+      <div class="project-grid">
+        <a href="https://www.torproject.org/" target="_blank" rel="noopener noreferrer"><strong>Tor Project ↗</strong><span>Tools and guidance for browsing and communicating with greater privacy.</span></a>
+        <a href="https://signal.org/" target="_blank" rel="noopener noreferrer"><strong>Signal ↗</strong><span>End-to-end encrypted messaging, calls, and group conversations.</span></a>
+        <a href="https://tails.net/" target="_blank" rel="noopener noreferrer"><strong>Tails ↗</strong><span>A portable operating system designed to help preserve privacy and anonymity.</span></a>
+        <a href="https://www.privacyguides.org/" target="_blank" rel="noopener noreferrer"><strong>Privacy Guides ↗</strong><span>Recommendations and practical education for privacy tools.</span></a>
+        <a href="https://ssd.eff.org/" target="_blank" rel="noopener noreferrer"><strong>EFF Surveillance Self-Defense ↗</strong><span>Guides to digital security, threat modeling, and safer communication.</span></a>
+      </div>
+    </section>
+
+    <section class="landing-bottom-cta">
+      <div class="eyebrow">Privacy is a Human Right</div>
+      <h2>Ready to take control of your keys?</h2>
+      <p>Create a local vault or unlock the one on this device.</p>
+      <a class="landing-cta" href="./">Go to vault <span aria-hidden="true">→</span></a>
+    </section>
+  </main>
+
+  <footer class="landing-footer">
+    <a class="brand" href="./landing.html"><img src="./kriptal.png" alt=""><span>KRIPTAL</span></a>
+    <div><a href="./">Open the app</a><a href="./?page=technical-details">Security details</a><a href="./legal.html">Legal notice</a><a href="https://github.com/matiasdieguez/kriptal-app" target="_blank" rel="noopener noreferrer">Open-source repository ↗</a></div>
+    <p>Encryption helps protect messages; it cannot protect every device, sharing channel, or recipient.</p>
+  </footer>
+</body>
+</html>

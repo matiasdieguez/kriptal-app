@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 240" role="img" aria-labelledby="title description">
+  <title id="title">Encrypt, sign, and share a message file</title>
+  <desc id="description">Choose a contact, write a message, then encrypt and sign it on your device before sharing the resulting file.</desc>
+  <rect width="620" height="240" rx="18" fill="#1b2420"/>
+  <g fill="#202a24" stroke="#8ac99f" stroke-width="3">
+    <rect x="42" y="58" width="142" height="112" rx="12"/>
+    <rect x="238" y="58" width="142" height="112" rx="12"/>
+    <rect x="434" y="58" width="142" height="112" rx="12"/>
+  </g>
+  <g fill="none" stroke="#e4c96b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="80" cy="94" r="15"/><path d="M57 139c4-20 42-20 46 0m14-43h43m-43 18h35"/>
+    <path d="M282 91V80a16 16 0 0 1 32 0v11m-38 0h44v42h-44z"/>
+    <path d="M480 91h50v42h-50zm0 0 25 21 25-21"/>
+    <path d="M193 114h34m-10-10 10 10-10 10m196-10h14m-10-10 10 10-10 10"/>
+  </g>
+  <g fill="#e8eee9" font-family="Arial,sans-serif" text-anchor="middle">
+    <text x="113" y="198" font-size="14" font-weight="700">WRITE</text>
+    <text x="309" y="198" font-size="14" font-weight="700">ENCRYPT + SIGN</text>
+    <text x="505" y="198" font-size="14" font-weight="700">SHARE FILE</text>
+  </g>
+</svg>

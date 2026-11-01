@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 240" role="img" aria-labelledby="title description">
+  <title id="title">Exchange public identities and verify fingerprints</title>
+  <desc id="description">Both people exchange public identity files and compare their key fingerprints through a trusted channel before messaging.</desc>
+  <rect width="620" height="240" rx="18" fill="#1b2420"/>
+  <g fill="none" stroke="#8ac99f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="64" y="48" width="116" height="126" rx="13"/>
+    <circle cx="122" cy="90" r="20"/>
+    <path d="M87 145c7-21 63-21 70 0m26-54h156m-16-16 16 16-16 16m-154 47h316m-16-16 16 16-16 16"/>
+    <rect x="440" y="48" width="116" height="126" rx="13"/>
+    <circle cx="498" cy="90" r="20"/>
+    <path d="M463 145c7-21 63-21 70 0"/>
+  </g>
+  <g fill="#e8eee9" font-family="Arial,sans-serif" text-anchor="middle">
+    <text x="122" y="207" font-size="15" font-weight="700">YOU</text>
+    <text x="498" y="207" font-size="15" font-weight="700">YOUR CONTACT</text>
+    <text x="310" y="54" fill="#e4c96b" font-size="13" font-weight="700">PUBLIC IDENTITY FILES</text>
+  </g>
+</svg>

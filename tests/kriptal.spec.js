@@ -156,9 +156,22 @@ test('language selector translates the home page and information pages in all su
     ru: 'Конфиденциальность — это право человека',
     eo: 'Privateco estas homa rajto'
   };
+  const expectedLandingLink = {
+    en: 'Learn about Kriptal',
+    es: 'Conoce Kriptal',
+    it: 'Scopri Kriptal',
+    pt: 'Conheça o Kriptal',
+    nl: 'Meer over Kriptal',
+    fr: 'Découvrir Kriptal',
+    zh: '了解 Kriptal',
+    ja: 'Kriptal について',
+    ru: 'Узнайте о Kriptal',
+    eo: 'Pri Kriptal'
+  };
   await page.goto('/');
   for (const [language, linkName] of Object.entries(expected)) {
     await page.locator('#language-select').selectOption(language);
+    await expect(page.locator('.landing-nav-link')).toHaveText(expectedLandingLink[language]);
     await expect(page.locator('.setup-intro .eyebrow')).toHaveText(expectedTagline[language]);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(expectedHeadline[language]);
     await expect(page.locator('html')).toHaveAttribute(
@@ -181,6 +194,22 @@ test('language selector translates the home page and information pages in all su
   await expect(page.getByText(/Kriptal intercambia archivos de mensajes cifrados/)).toBeVisible();
   await page.reload();
   await expect(page.locator('#language-select')).toHaveValue('es');
+});
+
+test('landing page explains security, installation, and use with working illustrations', async ({ page }) => {
+  await page.goto('/landing.html');
+  await expect(page).toHaveTitle('Privacy is a Human Right | Kriptal');
+  await expect(page.getByRole('heading', { name: 'Your keys stay yours.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Good security is a shared habit.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Make Kriptal an app.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'From first setup to a verified message.' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Tor Project ↗' })).toHaveAttribute('href', 'https://www.torproject.org/');
+  await expect(page.getByRole('link', { name: 'Open Kriptal' }).first()).toHaveAttribute('href', './');
+  await expect(page.locator('.landing-section img')).toHaveCount(4);
+  for (const image of await page.locator('.landing-section img').all()) {
+    await expect(image).toHaveJSProperty('complete', true);
+    await expect.poll(() => image.evaluate((element) => element.naturalWidth)).toBeGreaterThan(0);
+  }
 });
 
 async function createIdentity(page, username) {
