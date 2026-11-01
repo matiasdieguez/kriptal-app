@@ -1,6 +1,35 @@
 import { test, expect } from '@playwright/test';
+import { b64, decodePayload, encodeIdentityPayload, encodePayload } from '../common.js';
 
 const password = 'correct horse battery staple';
+
+test('compact public identity links are smaller and legacy links still decode', () => {
+  const payload = {
+    v: 2,
+    username: 'MatiCelu',
+    publicKey: {
+      crv: 'P-256',
+      ext: true,
+      key_ops: [],
+      kty: 'EC',
+      x: b64(new Uint8Array(32)),
+      y: b64(new Uint8Array(32))
+    },
+    kemPublicKey: b64(new Uint8Array(1184)),
+    signingPublicKey: b64(new Uint8Array(1952))
+  };
+  const compact = encodeIdentityPayload(payload);
+  const legacy = encodePayload(payload);
+
+  expect(compact.length).toBeLessThan(legacy.length);
+  expect(
+    `https://matiasdieguez.github.io/kriptal-app/#k=${compact}`.length
+  ).toBeLessThanOrEqual(4096);
+  expect(decodePayload(compact)).toEqual(payload);
+  const link = `https://matiasdieguez.github.io/kriptal-app/#k=${compact}`;
+  expect(decodePayload(new URLSearchParams(new URL(link).hash.slice(1)).get('k'))).toEqual(payload);
+  expect(decodePayload(legacy)).toEqual(payload);
+});
 
 async function createIdentity(page, username) {
   await page.goto('/');

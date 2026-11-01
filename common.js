@@ -8,6 +8,8 @@ export const MAX_MESSAGE_AGE = 7 * 24 * 60 * 60 * 1000;
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
+const base85Alphabet =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!$'()*,-./:;?@[]^_`{|}~";
 
 export const b64 = (value) =>
   btoa(String.fromCharCode(...new Uint8Array(value)))
@@ -43,14 +45,116 @@ export function encodePayload(value) {
 
 export function decodePayload(value) {
   try {
+    if (value.startsWith('id2.')) return decodeIdentityPayload(decodeBase85(value.slice(4)));
     return fromJson(bytes(value));
   } catch {
     return null;
   }
 }
 
+export function encodeIdentityPayload(value) {
+  const username = textEncoder.encode(value.username);
+  const fields = [
+    bytes(value.publicKey.x),
+    bytes(value.publicKey.y),
+    bytes(value.kemPublicKey),
+    bytes(value.signingPublicKey)
+  ];
+  const size = 5 + username.length + fields.reduce((total, field) => total + 2 + field.length, 0);
+  const payload = new Uint8Array(size);
+  const view = new DataView(payload.buffer);
+  let offset = 0;
+  payload[offset++] = VERSION;
+  view.setUint16(offset, payload.length);
+  offset += 2;
+  view.setUint16(offset, username.length);
+  offset += 2;
+  payload.set(username, offset);
+  offset += username.length;
+  for (const field of fields) {
+    view.setUint16(offset, field.length);
+    offset += 2;
+    payload.set(field, offset);
+    offset += field.length;
+  }
+  return `id2.${encodeBase85(payload)}`;
+}
+
+function decodeIdentityPayload(payload) {
+  const view = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
+  let offset = 0;
+  if (payload[offset++] !== VERSION) throw new Error('Unsupported identity link version');
+  const payloadLength = view.getUint16(offset);
+  offset += 2;
+  if (payloadLength < 5 || payloadLength > payload.length) throw new Error('Malformed identity link');
+  payload = payload.subarray(0, payloadLength);
+  const usernameLength = view.getUint16(offset);
+  offset += 2;
+  const username = textDecoder.decode(payload.subarray(offset, offset + usernameLength));
+  offset += usernameLength;
+  const fields = [];
+  for (let i = 0; i < 4; i++) {
+    const length = view.getUint16(offset);
+    offset += 2;
+    fields.push(payload.slice(offset, offset + length));
+    offset += length;
+  }
+  if (offset !== payload.length) throw new Error('Malformed identity link');
+  return {
+    v: VERSION,
+    username,
+    publicKey: {
+      crv: 'P-256',
+      ext: true,
+      key_ops: [],
+      kty: 'EC',
+      x: b64(fields[0]),
+      y: b64(fields[1])
+    },
+    kemPublicKey: b64(fields[2]),
+    signingPublicKey: b64(fields[3])
+  };
+}
+
+function encodeBase85(value) {
+  let encoded = '';
+  for (let offset = 0; offset < value.length; offset += 4) {
+    let block = 0;
+    for (let i = 0; i < 4; i++)
+      block = block * 256 + (value[offset + i] || 0);
+    const digits = new Array(5);
+    for (let i = 4; i >= 0; i--) {
+      digits[i] = base85Alphabet[block % 85];
+      block = Math.floor(block / 85);
+    }
+    encoded += digits.join('');
+  }
+  return encoded;
+}
+
+function decodeBase85(value) {
+  if (value.length % 5 !== 0) throw new Error('Malformed identity link');
+  const decoded = new Uint8Array((value.length / 5) * 4);
+  for (let offset = 0; offset < value.length; offset += 5) {
+    let block = 0;
+    for (let i = 0; i < 5; i++) {
+      const digit = base85Alphabet.indexOf(value[offset + i]);
+      if (digit < 0) throw new Error('Malformed identity link');
+      block = block * 85 + digit;
+    }
+    if (block > 0xffffffff) throw new Error('Malformed identity link');
+    const byteOffset = (offset / 5) * 4;
+    for (let i = 3; i >= 0; i--) {
+      decoded[byteOffset + i] = block % 256;
+      block = Math.floor(block / 256);
+    }
+  }
+  return decoded;
+}
+
 export function linkFor(type, value) {
-  return `${location.origin}${location.pathname}#${type}=${encodePayload(value)}`;
+  const encoded = type === 'k' ? encodeIdentityPayload(value) : encodePayload(value);
+  return `${location.origin}${location.pathname}#${type}=${encoded}`;
 }
 
 export function storeRecord(record) {
