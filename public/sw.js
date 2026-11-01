@@ -1,4 +1,4 @@
-const CACHE = 'kriptal-v11';
+const CACHE = 'kriptal-v12';
 const APP_ROOT = new URL('./', self.registration.scope).pathname;
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(
