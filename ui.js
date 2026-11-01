@@ -31,6 +31,7 @@ import {
   newIdentity,
   publicFingerprint
 } from './crypto.js';
+import { languages, languageTag, translateAttribute, translateText } from './translations.js';
 
 export function initUI({ app, toast }) {
   const textEncoder = new TextEncoder();
@@ -41,9 +42,77 @@ export function initUI({ app, toast }) {
   let pendingLinkOpened = false;
   const pendingLaunchFiles = [];
   let processingLaunchFiles = false;
+  const originalText = new WeakMap();
+  const originalAttributes = new WeakMap();
+  const languageSelect = document.querySelector('#language-select');
+  let language = languages.some((item) => item.code === localStorage.getItem('kriptal-language'))
+    ? localStorage.getItem('kriptal-language')
+    : 'en';
+  languageSelect.value = language;
+
+  function localizeElement(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (!originalText.has(node)) originalText.set(node, node.nodeValue);
+      const source = originalText.get(node);
+      const trimmed = source.trim();
+      if (!trimmed) continue;
+      const translated = translateText(trimmed, language);
+      const localized = translated === trimmed ? source : source.replace(trimmed, translated);
+      if (node.nodeValue !== localized) node.nodeValue = localized;
+    }
+    root.querySelectorAll?.('[placeholder], [aria-label], [title]').forEach((element) => {
+      if (!originalAttributes.has(element)) originalAttributes.set(element, {});
+      const sources = originalAttributes.get(element);
+      for (const attribute of ['placeholder', 'aria-label', 'title']) {
+        const value = element.getAttribute(attribute);
+        if (value) {
+          if (!(attribute in sources)) sources[attribute] = value;
+          element.setAttribute(attribute, translateAttribute(sources[attribute], language));
+        }
+      }
+    });
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = languageTag(language);
+    languageSelect.value = language;
+    localizeElement(document.body);
+    const infoPage = new URLSearchParams(location.search).get('page');
+    const infoTitle =
+      infoPage === 'technical-details'
+        ? 'Security & technical details'
+        : infoPage === 'how-it-works'
+          ? 'How Kriptal works'
+          : null;
+    document.title = infoTitle
+      ? `${translateText(infoTitle, language)} | Kriptal`
+      : translateText('Kriptal | Private, local-first encrypted messaging', language);
+  }
+
+  languageSelect.addEventListener('change', () => {
+    language = languageSelect.value;
+    localStorage.setItem('kriptal-language', language);
+    applyLanguage();
+  });
+
+  const localizationObserver = new MutationObserver((records) => {
+    for (const record of records) {
+      if (record.target.nodeType === Node.ELEMENT_NODE && app.contains(record.target))
+        localizeElement(record.target);
+      else if (record.target.parentElement && app.contains(record.target.parentElement))
+        localizeElement(record.target.parentElement);
+      for (const added of record.addedNodes) {
+        if (added.nodeType === Node.ELEMENT_NODE && app.contains(added))
+          localizeElement(added);
+      }
+    }
+  });
+  localizationObserver.observe(app, { childList: true, subtree: true, characterData: true });
 
   function toastMessage(message) {
-    toast.textContent = message;
+    toast.textContent = translateText(message, language);
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2600);
   }
@@ -56,8 +125,19 @@ export function initUI({ app, toast }) {
   }
 
   function renderSetup() {
+    app.classList.add('setup-screen');
+    document.documentElement.lang = languageTag(language);
+    const infoPage = new URLSearchParams(location.search).get('page');
+    if (infoPage === 'how-it-works' || infoPage === 'technical-details') {
+      renderInfoPage(infoPage);
+      return;
+    }
+    document.title = translateText('Kriptal | Private, local-first encrypted messaging', language);
+    document.querySelector('meta[name="description"]').content =
+      'Create a local identity, encrypt private messages for your contacts, and share them as files. Kriptal is a free, offline-first encrypted messaging PWA with no server inbox.';
     const hasAccount = Boolean(storedRecord());
-    app.innerHTML = `<section class="hero"><div><div class="eyebrow">Private communication, reimagined</div><h1>Your words.<br><em>Only your words.</em></h1><p class="lede">Kriptal encrypts messages and files for sharing. No inboxes, no accounts on a server, no trail to follow.</p></div><div class="hero-mark"><strong>Nothing leaves this device until you choose to share it.</strong></div></section><section class="panel auth-panel"><div class="panel-head"><div><div class="section-label">${hasAccount ? 'Welcome back' : 'Create your identity'}</div><h2>${hasAccount ? 'Unlock your vault' : 'Set up your local vault'}</h2></div><div class="section-label">01 / 03</div></div><div class="notice">Your password never leaves this browser. The vault uses AES-256-GCM. Messages use hybrid ML-KEM-768 + P-256 encryption and ML-DSA-65 sender authentication. There is no password reset.</div><form id="auth-form"><div class="form-grid">${!hasAccount ? '<div><label for="username">Your username</label><input id="username" name="username" required minlength="2" maxlength="32" placeholder="e.g. maren" autocomplete="username"></div>' : ''}<div class="${hasAccount ? 'full' : ''}"><label for="password">${hasAccount ? 'Vault password' : 'Choose a strong password'}</label><input id="password" name="password" type="password" required minlength="10" autocomplete="${hasAccount ? 'current-password' : 'new-password'}" placeholder="10 characters minimum"></div></div><div class="actions"><button type="submit">${hasAccount ? 'Unlock Kriptal' : 'Generate my identity'}</button>${hasAccount ? '<button type="button" class="danger" id="reset-account">Erase local vault</button>' : ''}</div></form></section>`;
+    app.innerHTML = `<div class="setup-layout"><section class="setup-intro"><div class="eyebrow">Private communication, reimagined</div><h1>Your words.<br><em>Only your words.</em></h1><p class="lede">Kriptal is a private, local-first encrypted messaging app. Encrypt messages for a contact and share them as files—without a server, inbox, or account.</p><div class="info-links"><a class="info-link" href="?page=how-it-works">How Kriptal works <span aria-hidden="true">→</span></a><a class="info-link" href="?page=technical-details">Security & technical details <span aria-hidden="true">→</span></a></div></section><section class="panel auth-panel"><div class="panel-head"><div><div class="section-label">${hasAccount ? 'Welcome back' : 'Create your identity'}</div><h2>${hasAccount ? 'Unlock your vault' : 'Set up your local vault'}</h2></div></div><div class="notice">Your vault is encrypted on this device. Messages use hybrid ML-KEM-768 + P-256 encryption and ML-DSA-65 sender authentication. Your password cannot be recovered.</div><form id="auth-form"><div class="form-grid">${!hasAccount ? '<div><label for="username">Your username</label><input id="username" name="username" required minlength="2" maxlength="32" placeholder="e.g. maren" autocomplete="username"></div>' : ''}<div class="${hasAccount ? 'full' : ''}"><label for="password">${hasAccount ? 'Vault password' : 'Choose a strong password'}</label><input id="password" name="password" type="password" required minlength="10" autocomplete="${hasAccount ? 'current-password' : 'new-password'}" placeholder="10 characters minimum"></div></div><div class="actions"><button type="submit">${hasAccount ? 'Unlock Kriptal' : 'Generate my identity'}</button>${hasAccount ? '<button type="button" class="danger" id="reset-account">Erase local vault</button>' : ''}</div></form></section></div>`;
+    localizeElement(app);
     document.querySelector('#auth-form').addEventListener('submit', hasAccount ? unlock : setup);
     document.querySelector('#reset-account')?.addEventListener('click', () => {
       if (confirm('Erase your local identity and contacts? This cannot be undone.')) {
@@ -67,6 +147,20 @@ export function initUI({ app, toast }) {
         renderSetup();
       }
     });
+  }
+
+  function renderInfoPage(page) {
+    const technical = page === 'technical-details';
+    const title = technical ? 'Security & technical details' : 'How Kriptal works';
+    document.title = `${translateText(title, language)} | Kriptal`;
+    document.querySelector('meta[name="description"]').content = technical
+      ? 'Technical overview of Kriptal security: encrypted local vault, hybrid P-256 and ML-KEM-768 message encryption, ML-DSA-65 signatures, key handling, and limitations.'
+      : 'Learn how Kriptal lets you create a local identity, exchange public keys, encrypt a message for a contact, and share it without a messaging server.';
+    const content = technical
+      ? `<h1>Security and technical details</h1><p class="lede">Kriptal encrypts messages on your device. There is no server inbox or message relay.</p><h2>Local vault</h2><p>Your identity and contacts are stored in an AES-256-GCM encrypted browser vault. PBKDF2-SHA-256 derives the unlock key from your password.</p><h2>Message encryption and sender authentication</h2><p>Messages combine ephemeral P-256 ECDH and ML-KEM-768. HKDF derives an AES-256-GCM key; ML-DSA-65 signs the message for sender verification.</p><h2>Identity exchange and file sharing</h2><p>Identity files contain public keys only. Message files contain signed ciphertext; message text and attachments are encrypted before sharing. Native file sharing and OS file opening depend on browser and platform support.</p><h2>Expiry, replay protection, and limits</h2><p>Messages expire after seven days and are marked as used after decryption. Text is limited to 10 KB and attachments to 50 KB.</p><h2>Standards and deployment</h2><p>ML-KEM-768 and ML-DSA-65 follow FIPS 203 and FIPS 204. Legacy links remain supported; their payload is stored in the URL fragment.</p>`
+      : `<h1>How Kriptal works</h1><p class="lede">Kriptal exchanges encrypted message files directly between people. No server, cloud inbox, or message relay is used.</p><h2>1. Create your local identity</h2><p>Create a username and vault password. Your identity and contacts stay in an encrypted vault on this device.</p><h2>2. Exchange public identities</h2><p>Share your public-key file and import the contact's public key. Compare fingerprints using a trusted channel.</p><h2>3. Write and encrypt a message</h2><p>Choose a contact, write a message, and optionally attach a small file. Kriptal encrypts it for the recipient and signs it with your identity.</p><h2>4. Share and open the file</h2><p>Share the encrypted message file. The recipient opens it in Kriptal, verifies the sender, and decrypts it on their device. Messages expire after seven days.</p><p>Keep your device and password secure. Losing your password or browser storage means your identity cannot be recovered.</p>`;
+    app.innerHTML = `<article class="info-page"><a class="back-link" href="./">← Back to Kriptal</a>${content}<a class="back-link" href="./">Return to Kriptal</a></article>`;
+    localizeElement(app);
   }
 
   async function setup(event) {
@@ -122,7 +216,9 @@ export function initUI({ app, toast }) {
   }
 
   function renderApp() {
+    app.classList.remove('setup-screen');
     app.innerHTML = `<div class="dashboard"><aside class="side"><div class="user"><div class="section-label">Local identity</div><strong>${escapeHtml(session.username)}</strong><p class="section-label">ML-KEM-768 / P-256</p></div><nav aria-label="Main navigation"><button class="${view === 'compose' ? 'active' : ''}" data-view="compose" aria-label="Compose"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/></svg><span class="nav-label">Compose</span></button><button class="${view === 'contacts' ? 'active' : ''}" data-view="contacts" aria-label="Contacts"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1.5A5.5 5.5 0 0 1 8 13h2a5.5 5.5 0 0 1 5.5 5.5V20Zm12-15.5a3.5 3.5 0 0 1 0 7m2 2h.5a4.5 4.5 0 0 1 4.5 4.5V20h-3"/></svg><span class="nav-label">Contacts</span></button><button class="${view === 'open-message' ? 'active' : ''}" data-view="open-message" aria-label="Open message"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5 8 8 0 0 1-3.4-.8L4 20l1.8-4.1A7.5 7.5 0 1 1 20 11.5Z"/><path d="M9 11.5h7m-3-3 3 3-3 3"/></svg><span class="nav-label">Open message</span></button><button class="${view === 'identity' ? 'active' : ''}" data-view="identity" aria-label="Identity"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="9" cy="10" r="2.5"/><path d="M5.5 16a3.5 3.5 0 0 1 7 0m3-5h3m-3 3h3"/></svg><span class="nav-label">Identity</span></button></nav></aside><section id="workspace"></section></div>`;
+    localizeElement(app);
     app.querySelectorAll('[data-view]').forEach((button) =>
       button.addEventListener('click', () => {
         view = button.dataset.view;
@@ -480,6 +576,7 @@ export function initUI({ app, toast }) {
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.innerHTML = `<div class="panel">${content}</div>`;
+    localizeElement(modal);
     document.body.appendChild(modal);
     modal.querySelector('#close-modal')?.addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (event) => {

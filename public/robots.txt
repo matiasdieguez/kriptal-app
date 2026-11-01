@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://matiasdieguez.github.io/kriptal-app/sitemap.xml

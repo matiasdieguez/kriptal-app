@@ -4,20 +4,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f5f1e8">
-  <meta name="description" content="Private, local-first encrypted messages carried by links.">
+  <meta name="description" content="Create a local identity, encrypt private messages for your contacts, and share them as files. Kriptal is a free, offline-first encrypted messaging PWA with no server inbox.">
+  <meta name="keywords" content="private messaging, encrypted messaging, secure messaging app, end-to-end encryption, offline messaging, local-first, encrypted file sharing, post-quantum cryptography, PWA">
+  <meta name="application-name" content="Kriptal">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://matiasdieguez.github.io/kriptal-app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Kriptal">
+  <meta property="og:title" content="Kriptal | Private, local-first encrypted messaging">
+  <meta property="og:description" content="Encrypt messages for your contacts on your device and share them as files. No server inbox or message relay.">
+  <meta property="og:url" content="https://matiasdieguez.github.io/kriptal-app/">
+  <meta property="og:image" content="https://matiasdieguez.github.io/kriptal-app/kriptal.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Kriptal | Private encrypted messaging">
+  <meta name="twitter:description" content="A local-first encrypted messaging PWA. Encrypt on your device, then share message files directly.">
+  <meta name="twitter:image" content="https://matiasdieguez.github.io/kriptal-app/kriptal.png">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Kriptal",
+      "applicationCategory": "CommunicationApplication",
+      "operatingSystem": "Web",
+      "url": "https://matiasdieguez.github.io/kriptal-app/",
+      "description": "An offline-first encrypted messaging PWA. Create a local identity, encrypt messages for contacts, and share encrypted files without a server inbox.",
+      "featureList": [
+        "Local encrypted identity vault",
+        "Hybrid P-256 and ML-KEM-768 message encryption",
+        "ML-DSA-65 sender signatures",
+        "Encrypted message file sharing",
+        "Offline-first progressive web app"
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  </script>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; manifest-src 'self' data:; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'self' blob:;">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.png">
   <link rel="stylesheet" href="./styles.css">
-  <title>Kriptal · private by link</title>
+  <title>Kriptal | Private, local-first encrypted messaging</title>
 </head>
 <body>
   <div class="grain"></div>
   <header class="topbar">
     <a class="brand" href="#" aria-label="Kriptal home"><img src="./kriptal.png" alt="Kriptal"><span>KRIPTAL</span></a>
-    <span class="offline-pill"><i></i> local only</span>
+    <div class="topbar-tools">
+      <label class="sr-only" for="language-select">Language</label>
+      <select id="language-select" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="it">Italiano</option>
+        <option value="pt">Português</option>
+        <option value="nl">Nederlands</option>
+        <option value="fr">Français</option>
+        <option value="zh">中文</option>
+        <option value="ja">日本語</option>
+        <option value="ru">Русский</option>
+        <option value="eo">Esperanto</option>
+      </select>
+      <span class="offline-pill"><i></i> local only</span>
+    </div>
   </header>
   <main id="app" class="shell"></main>
+  <noscript>
+    <section class="noscript-seo">
+      <h1>Private, local-first encrypted messaging</h1>
+      <p>Kriptal is an offline-first encrypted messaging PWA. Create a local identity, exchange public keys, encrypt a message for a contact, and share it as a file. There is no server inbox or message relay.</p>
+      <p>Messages use hybrid P-256 and ML-KEM-768 encryption with ML-DSA-65 sender authentication. Enable JavaScript to create or unlock your local vault and use Kriptal.</p>
+    </section>
+  </noscript>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script type="module" src="./app.js"></script>
 </body>

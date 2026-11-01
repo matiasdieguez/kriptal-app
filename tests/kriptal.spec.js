@@ -71,6 +71,60 @@ test('compact message links round-trip through URL parsing and retain legacy sup
   expect(decodePayload(legacy)).toEqual(payload);
 });
 
+test('home provides readable how-it-works and technical security pages', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: /How Kriptal works/ }).click();
+  await expect(page.getByRole('heading', { name: 'How Kriptal works' })).toBeVisible();
+  await expect(page.getByText(/No server, cloud inbox, or message relay/)).toBeVisible();
+  await page.getByRole('link', { name: '← Back to Kriptal' }).click();
+  await page.getByRole('link', { name: /Security & technical details/ }).click();
+  await expect(page.getByRole('heading', { name: 'Security and technical details' })).toBeVisible();
+  await expect(page.getByText(/PBKDF2-SHA-256/)).toBeVisible();
+  await expect(page.getByText(/ML-KEM-768/).first()).toBeVisible();
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    /Technical overview of Kriptal security/
+  );
+});
+
+test('language selector translates the home page and information pages in all supported languages', async ({ page }) => {
+  const expected = {
+    en: 'How Kriptal works',
+    es: 'Cómo funciona Kriptal',
+    it: 'Come funziona Kriptal',
+    pt: 'Como o Kriptal funciona',
+    nl: 'Hoe Kriptal werkt',
+    fr: 'Comment fonctionne Kriptal',
+    zh: 'Kriptal 的工作方式',
+    ja: 'Kriptal の使い方',
+    ru: 'Как работает Kriptal',
+    eo: 'Kiel Kriptal funkcias'
+  };
+  await page.goto('/');
+  for (const [language, linkName] of Object.entries(expected)) {
+    await page.locator('#language-select').selectOption(language);
+    await expect(page.locator('html')).toHaveAttribute(
+      'lang',
+      language === 'zh' ? 'zh-CN' : language
+    );
+    await expect(page.locator('a[href="?page=how-it-works"]')).toContainText(linkName);
+    if (language === 'es') {
+      await page.getByLabel('Tu nombre de usuario').fill('maren');
+      await page.getByLabel('Elige una contraseña segura').fill(password);
+    }
+    if (language === 'it') {
+      await expect(page.getByLabel('Il tuo nome utente')).toHaveValue('maren');
+      await expect(page.getByLabel('Scegli una password sicura')).toHaveValue(password);
+    }
+  }
+  await page.locator('#language-select').selectOption('es');
+  await page.locator('a[href="?page=how-it-works"]').click();
+  await expect(page.getByRole('heading', { name: 'Cómo funciona Kriptal' })).toBeVisible();
+  await expect(page.getByText(/Kriptal intercambia archivos de mensajes cifrados/)).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#language-select')).toHaveValue('es');
+});
+
 async function createIdentity(page, username) {
   await page.goto('/');
   await page.getByLabel('Your username').fill(username);
@@ -151,7 +205,18 @@ test('creates a local identity and unlocks it after reload', async ({ browser })
   const context = await browser.newContext();
   const page = await context.newPage();
 
-  await createIdentity(page, 'maren');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.locator('.hero-mark')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(
+    844
+  );
+  await page.getByLabel('Your username').fill('maren');
+  await page.getByLabel('Choose a strong password').fill(password);
+  await page.getByRole('button', { name: 'Generate my identity' }).click();
+  await expect(page.locator('.user strong')).toHaveText('maren');
+
+  await page.setViewportSize({ width: 1280, height: 900 });
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   await expect(nav.getByText('Compose')).toBeVisible();
   await expect(nav.locator('.nav-icon')).toHaveCount(4);
